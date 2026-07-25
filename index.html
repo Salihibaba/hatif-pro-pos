@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>هاتف برو | نظام إدارة محلات الهواتف</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="القائمة الرئيسية">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">هـ</div>
+        <div>
+          <strong>هاتف برو</strong>
+          <span>إدارة بيع وشراء الهواتف</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <button class="nav-item active" data-view="dashboard">⌂ <span>لوحة التحكم</span></button>
+        <button class="nav-item" data-view="pos">＋ <span>بيع سريع</span></button>
+        <button class="nav-item" data-view="inventory">▦ <span>المخزون</span></button>
+        <button class="nav-item" data-view="trade">⇄ <span>شراء واستبدال</span></button>
+        <button class="nav-item" data-view="contacts">◎ <span>العملاء والموردون</span></button>
+        <button class="nav-item" data-view="invoices">▤ <span>الفواتير</span></button>
+        <button class="nav-item" data-view="reports">◒ <span>التقارير</span></button>
+        <button class="nav-item" data-view="settings">⚙ <span>الإعدادات</span></button>
+      </nav>
+
+      <div class="branch-box">
+        <span>الفرع الحالي</span>
+        <strong>فرع نواكشوط</strong>
+        <small>متصل - آخر مزامنة قبل 4 دقائق</small>
+      </div>
+    </aside>
+
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">نظام تجاري عربي متعدد الفروع</p>
+          <h1 id="viewTitle">لوحة التحكم</h1>
+        </div>
+        <div class="top-actions">
+          <label class="search">
+            <span>⌕</span>
+            <input id="globalSearch" type="search" placeholder="ابحث بالاسم، IMEI، العميل، أو رقم الفاتورة..." />
+          </label>
+          <button class="icon-button" title="قارئ الباركود" aria-label="قارئ الباركود">▣</button>
+          <button class="icon-button" title="الإشعارات" aria-label="الإشعارات">🔔</button>
+          <button class="theme-toggle" id="themeToggle" type="button">الوضع الليلي</button>
+          <button class="user-chip" aria-label="حساب المستخدم">
+            <span class="avatar">م</span>
+            <span>مدير النظام</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="view active" id="dashboard" aria-label="لوحة التحكم">
+        <div class="stats-grid">
+          <article class="metric">
+            <span>مبيعات اليوم</span>
+            <strong>1,284,000 أوقية</strong>
+            <small class="positive">+18% عن أمس</small>
+          </article>
+          <article class="metric">
+            <span>صافي الربح</span>
+            <strong>286,500 أوقية</strong>
+            <small>هامش ربح 22%</small>
+          </article>
+          <article class="metric">
+            <span>هواتف مباعة</span>
+            <strong>34</strong>
+            <small>20 جديد، 14 مستعمل</small>
+          </article>
+          <article class="metric warning">
+            <span>تنبيهات المخزون</span>
+            <strong>6</strong>
+            <small>إكسسوارات وكميات منخفضة</small>
+          </article>
+        </div>
+
+        <div class="workspace-grid">
+          <section class="panel wide">
+            <div class="panel-header">
+              <div>
+                <h2>المبيعات والأرباح خلال الأسبوع</h2>
+                <p>مقارنة يومية لكل الفروع</p>
+              </div>
+              <select aria-label="اختيار الفرع">
+                <option>كل الفروع</option>
+                <option>فرع نواكشوط</option>
+                <option>فرع نواذيبو</option>
+              </select>
+            </div>
+            <div class="chart" aria-label="رسم بياني للمبيعات">
+              <span style="--h: 44%"><b>سبت</b></span>
+              <span style="--h: 62%"><b>أحد</b></span>
+              <span style="--h: 56%"><b>اثن</b></span>
+              <span style="--h: 78%"><b>ثلا</b></span>
+              <span style="--h: 71%"><b>أرب</b></span>
+              <span style="--h: 92%"><b>خمس</b></span>
+              <span style="--h: 68%"><b>جمع</b></span>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>الأكثر مبيعًا</h2>
+            </div>
+            <ul class="ranking">
+              <li><span>iPhone 15 Pro Max 256GB</span><strong>11</strong></li>
+              <li><span>Samsung Galaxy A55</span><strong>9</strong></li>
+              <li><span>شاحن USB-C سريع 25W</span><strong>42</strong></li>
+              <li><span>سماعة AirPods Pro</span><strong>18</strong></li>
+            </ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="pos" aria-label="بيع سريع">
+        <div class="sales-layout">
+          <section class="panel product-picker">
+            <div class="panel-header">
+              <div>
+                <h2>إنشاء فاتورة بيع</h2>
+                <p>اختر هاتفًا أو إكسسوارًا مع فحص IMEI تلقائيًا</p>
+              </div>
+              <div class="segmented" role="tablist" aria-label="تصنيف المنتجات">
+                <button class="active" data-category="الكل">الكل</button>
+                <button data-category="هواتف جديدة">جديد</button>
+                <button data-category="هواتف مستعملة">مستعمل</button>
+                <button data-category="إكسسوارات">إكسسوارات</button>
+              </div>
+            </div>
+            <div class="product-grid" id="saleProducts"></div>
+          </section>
+
+          <aside class="panel cart-panel">
+            <div class="panel-header">
+              <h2>الفاتورة</h2>
+              <button class="text-button" id="clearCart">مسح</button>
+            </div>
+            <label class="field">
+              <span>العميل</span>
+              <select id="customerSelect">
+                <option>عميل نقدي</option>
+                <option>محمد الأمين</option>
+                <option>شركة الساحل</option>
+                <option>خديجة بنت سالم</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>طريقة الدفع</span>
+              <select>
+                <option>نقدًا</option>
+                <option>تحويل بنكي</option>
+                <option>بطاقة</option>
+                <option>دفع آجل</option>
+              </select>
+            </label>
+            <div class="cart-items" id="cartItems"></div>
+            <div class="totals">
+              <div><span>الإجمالي</span><strong id="subtotal">0 أوقية</strong></div>
+              <div><span>الضريبة</span><strong id="tax">0 أوقية</strong></div>
+              <div class="grand"><span>المبلغ النهائي</span><strong id="grandTotal">0 أوقية</strong></div>
+            </div>
+            <div class="pay-actions">
+              <button class="secondary" id="draftButton">حفظ مسودة</button>
+              <button class="primary" id="payButton">إتمام البيع</button>
+              <button class="secondary" id="printButton">طباعة 80 مم</button>
+              <button class="secondary" id="shareButton">إرسال واتساب</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="inventory" aria-label="المخزون">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>إدارة الهواتف والإكسسوارات</h2>
+              <p>IMEI، الحالة، تكلفة الشراء، وسعر البيع</p>
+            </div>
+            <button class="primary">＋ صنف جديد</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>الصنف</th><th>التصنيف</th><th>IMEI</th><th>التكلفة</th><th>سعر البيع</th><th>المخزون</th><th>الحالة</th></tr>
+              </thead>
+              <tbody id="productsTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="trade" aria-label="شراء واستبدال">
+        <div class="trade-grid">
+          <section class="panel">
+            <div class="panel-header"><h2>تسجيل عملية شراء</h2></div>
+            <label class="field"><span>المورد أو العميل</span><input value="أحمد ولد المختار" /></label>
+            <label class="field"><span>نوع العملية</span><select><option>شراء هاتف مستعمل</option><option>استبدال بهاتف جديد</option><option>إرجاع</option></select></label>
+            <label class="field"><span>رقم IMEI</span><input value="356938035643809" /></label>
+            <label class="field"><span>سعر الشراء</span><input value="145000" /></label>
+            <button class="primary full">حفظ العملية</button>
+          </section>
+          <section class="panel">
+            <div class="panel-header"><h2>آخر عمليات الاستبدال</h2></div>
+            <div class="timeline">
+              <div><span>اليوم</span><strong>iPhone 12 مستعمل مقابل Galaxy A55</strong><small>فرق مدفوع 86,000 أوقية</small></div>
+              <div><span>أمس</span><strong>شراء Redmi Note 13</strong><small>تكلفة 92,000 أوقية</small></div>
+              <div><span>هذا الأسبوع</span><strong>استبدال Samsung S22 Ultra</strong><small>ربح متوقع 48,000 أوقية</small></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="contacts" aria-label="العملاء والموردون">
+        <div class="customers-grid">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>العملاء والموردون</h2>
+              <button class="primary">＋ جهة جديدة</button>
+            </div>
+            <div class="customer-list" id="customersList"></div>
+          </section>
+          <section class="panel customer-profile">
+            <div class="profile-head">
+              <span class="avatar large">خ</span>
+              <div>
+                <h2>خديجة بنت سالم</h2>
+                <p>عميل ذهبي منذ 2024</p>
+              </div>
+            </div>
+            <div class="stats-grid compact">
+              <article class="metric"><span>المشتريات</span><strong>2,390,000 أوقية</strong></article>
+              <article class="metric"><span>الفواتير</span><strong>18</strong></article>
+            </div>
+            <div class="timeline">
+              <div><span>اليوم</span><strong>فاتورة #H1048</strong><small>286,000 أوقية</small></div>
+              <div><span>أمس</span><strong>ضمان شاشة</strong><small>قيد المتابعة</small></div>
+              <div><span>الأسبوع الماضي</span><strong>شراء AirPods Pro</strong><small>78,000 أوقية</small></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="invoices" aria-label="الفواتير">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>الفواتير الأخيرة</h2>
+              <p>طباعة A4 أو حراري 58/80 مم وإرسال عبر WhatsApp</p>
+            </div>
+            <button class="secondary">تصدير Excel</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>رقم الفاتورة</th><th>العميل</th><th>التاريخ</th><th>المبلغ</th><th>الحالة</th></tr>
+              </thead>
+              <tbody id="invoiceTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="reports" aria-label="التقارير">
+        <div class="workspace-grid">
+          <section class="panel wide">
+            <div class="panel-header">
+              <div>
+                <h2>الأرباح والخسائر</h2>
+                <p>إيرادات، تكاليف، وضمانات</p>
+              </div>
+              <select aria-label="الفترة">
+                <option>هذا الشهر</option>
+                <option>آخر 90 يوم</option>
+                <option>هذا العام</option>
+              </select>
+            </div>
+            <div class="report-bars">
+              <div><span>الإيرادات</span><b style="--w: 88%"></b><strong>18.4M</strong></div>
+              <div><span>التكاليف</span><b style="--w: 54%"></b><strong>11.2M</strong></div>
+              <div><span>الأرباح</span><b style="--w: 66%"></b><strong>4.9M</strong></div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header"><h2>تنبيهات ذكية</h2></div>
+            <ul class="insights">
+              <li>لا يمكن تكرار IMEI المسجل: 356938035643809.</li>
+              <li>شواحن USB-C أقل من حد إعادة الطلب.</li>
+              <li>فرع نواذيبو يحتاج مزامنة 14 فاتورة غير مرفوعة.</li>
+            </ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="settings" aria-label="الإعدادات">
+        <div class="settings-grid">
+          <section class="panel">
+            <div class="panel-header"><h2>إعدادات المتجر</h2></div>
+            <label class="field"><span>اسم المتجر</span><input value="هاتف برو" /></label>
+            <label class="field"><span>العملة</span><select><option>الأوقية الموريتانية</option><option>الدولار الأمريكي</option><option>الريال السعودي</option></select></label>
+            <label class="field"><span>حجم الفاتورة الافتراضي</span><select><option>حراري 80 مم</option><option>حراري 58 مم</option><option>A4</option></select></label>
+          </section>
+          <section class="panel">
+            <div class="panel-header"><h2>الصلاحيات والأمان</h2></div>
+            <label class="toggle"><input type="checkbox" checked /> <span>منع حذف الفواتير بعد اعتمادها</span></label>
+            <label class="toggle"><input type="checkbox" checked /> <span>تسجيل كل العمليات في سجل التدقيق</span></label>
+            <label class="toggle"><input type="checkbox" checked /> <span>طلب صلاحية المدير لتعديل IMEI</span></label>
+            <label class="toggle"><input type="checkbox" /> <span>تفعيل النسخ الاحتياطي عبر Firebase</span></label>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
