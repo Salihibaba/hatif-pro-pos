@@ -1,4 +1,4 @@
-const products = [
+let products = [
   { id: 1, name: "iPhone 15 Pro Max 256GB", category: "هواتف جديدة", price: 630000, cost: 570000, stock: 6, imei: "353921102938475", icon: "▰" },
   { id: 2, name: "Samsung Galaxy A55 5G", category: "هواتف جديدة", price: 238000, cost: 205000, stock: 12, imei: "358240116543902", icon: "▱" },
   { id: 3, name: "Xiaomi Redmi Note 13", category: "هواتف جديدة", price: 146000, cost: 119000, stock: 4, imei: "869120449218330", icon: "▰" },
@@ -9,20 +9,20 @@ const products = [
   { id: 8, name: "حماية شاشة زجاجية", category: "إكسسوارات", price: 2500, cost: 900, stock: 32, imei: "-", icon: "□" }
 ];
 
-const customers = [
+let customers = [
   { name: "خديجة بنت سالم", type: "عميل ذهبي", total: "2,390,000 أوقية" },
   { name: "شركة الساحل", type: "عميل شركات", total: "8,145,000 أوقية" },
   { name: "محمد الأمين", type: "عميل نقدي", total: "928,000 أوقية" },
   { name: "مورد التقنيات الحديثة", type: "مورد", total: "12,800,000 أوقية" }
 ];
 
-const warehouses = [
+let warehouses = [
   { code: "WH-NKC", name: "المستودع الرئيسي - نواكشوط", branch: "فرع نواكشوط", manager: "محمد الأمين", capacity: 120, used: 80, status: "نشط" },
   { code: "WH-NDB", name: "مستودع نواذيبو", branch: "فرع نواذيبو", manager: "خديجة بنت سالم", capacity: 75, used: 43, status: "نشط" },
   { code: "WH-ACC", name: "مستودع القطع والإكسسوارات", branch: "فرع نواكشوط", manager: "شركة الساحل", capacity: 220, used: 146, status: "مراجعة" }
 ];
 
-const warehouseStocks = [
+let warehouseStocks = [
   { warehouse: "المستودع الرئيسي - نواكشوط", product: "iPhone 15 Pro Max 256GB", category: "هواتف جديدة", available: 4, reserved: 1, minimum: 2 },
   { warehouse: "المستودع الرئيسي - نواكشوط", product: "Samsung Galaxy A55 5G", category: "هواتف جديدة", available: 7, reserved: 2, minimum: 3 },
   { warehouse: "مستودع نواذيبو", product: "Xiaomi Redmi Note 13", category: "هواتف جديدة", available: 3, reserved: 0, minimum: 4 },
@@ -56,6 +56,23 @@ const titles = {
 };
 
 let activeCategory = "الكل";
+
+async function loadSupabaseData() {
+  const database = window.phoneProSupabase;
+  if (!database?.isConnected) return;
+
+  try {
+    const remoteData = await database.loadInitialData();
+    if (remoteData.products.length) products = remoteData.products;
+    if (remoteData.customers.length) customers = remoteData.customers;
+    if (remoteData.warehouses.length) warehouses = remoteData.warehouses;
+    if (remoteData.warehouseStocks.length) warehouseStocks = remoteData.warehouseStocks;
+    if (remoteData.invoices.length) invoices = remoteData.invoices;
+  } catch (error) {
+    console.error("Supabase sync failed", error);
+    showToast("تعذر تحميل بيانات Supabase، سيتم استخدام البيانات المحلية.");
+  }
+}
 
 function switchView(viewId) {
   document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === viewId));
@@ -264,7 +281,7 @@ function refreshProductViews() {
   renderProductsTable(visibleProducts);
 }
 
-function completePayment() {
+async function completePayment() {
   const items = [...cart.values()];
   if (!items.length) {
     showToast("أضف صنفًا واحدًا على الأقل قبل إتمام البيع.");
@@ -281,12 +298,26 @@ function completePayment() {
     product.stock = Math.max(0, product.stock - item.qty);
   });
 
-  invoices = [[nextNumber, customer, "الآن", money(grandTotal), "مدفوعة"], ...invoices];
+  const invoice = [nextNumber, customer, "الآن", money(grandTotal), "مدفوعة"];
+  invoices = [invoice, ...invoices];
   cart.clear();
   renderCart();
   refreshProductViews();
   renderInvoices();
   localStorage.removeItem("phoneProDraft");
+
+  try {
+    if (window.phoneProSupabase?.isConnected) {
+      await window.phoneProSupabase.recordSale({ invoice, items });
+      showToast(`تم إصدار الفاتورة ${nextNumber} ومزامنتها مع Supabase.`);
+      return;
+    }
+  } catch (error) {
+    console.error("Supabase sale save failed", error);
+    showToast(`تم إصدار الفاتورة ${nextNumber} محليًا، لكن فشلت مزامنتها مع Supabase.`);
+    return;
+  }
+
   showToast(`تم إصدار الفاتورة ${nextNumber} بقيمة ${money(grandTotal)}.`);
 }
 
@@ -366,12 +397,17 @@ document.getElementById("themeToggle").addEventListener("click", event => {
   event.currentTarget.textContent = document.body.classList.contains("dark") ? "الوضع النهاري" : "الوضع الليلي";
 });
 
-renderSaleProducts();
-renderProductsTable();
-renderInventorySummary();
-renderWarehousesTable();
-renderWarehouseStocksTable();
-renderCustomers();
-renderInvoices();
-renderCart();
-restoreDraft();
+async function initializeApp() {
+  await loadSupabaseData();
+  renderSaleProducts();
+  renderProductsTable();
+  renderInventorySummary();
+  renderWarehousesTable();
+  renderWarehouseStocksTable();
+  renderCustomers();
+  renderInvoices();
+  renderCart();
+  restoreDraft();
+}
+
+initializeApp();

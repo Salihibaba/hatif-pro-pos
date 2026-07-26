@@ -12,3 +12,4 @@ temp/
 # Local environment files
 .env
 .env.*
+supabase-config.js
