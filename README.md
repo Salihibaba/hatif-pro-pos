@@ -21,3 +21,21 @@
 4. افتح `index.html` من جديد. عند توفر الإعدادات سيقرأ التطبيق البيانات من Supabase ويحفظ الفواتير الجديدة هناك.
 
 ملف `supabase-config.js` مضاف إلى `.gitignore` حتى لا تُرفع المفاتيح بالخطأ. يوجد ملف `supabase-config.example.js` كنموذج.
+
+## الحفظ التلقائي على GitHub
+
+لتشغيل المزامنة التلقائية افتح PowerShell داخل مجلد المشروع وشغّل:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\auto-sync.ps1
+```
+
+سيقوم السكربت كل 30 ثانية بفحص التغييرات، ثم تنفيذ `git add -A` و`git commit` و`git push` تلقائيًا إلى `origin/main`.
+
+لتشغيله في الخلفية:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-auto-sync.ps1
+```
+
+إذا ظهر تعارض أثناء `git pull --rebase`، سيترك السكربت التزامن إلى أن يتم حل التعارض يدويًا.
