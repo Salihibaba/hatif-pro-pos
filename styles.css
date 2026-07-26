@@ -201,6 +201,11 @@ h2 { margin-bottom: 4px; font-size: 20px; }
   gap: 16px;
 }
 
+.inventory-stack {
+  display: grid;
+  gap: 16px;
+}
+
 .panel { padding: 18px; min-width: 0; }
 .panel-header { justify-content: space-between; gap: 12px; margin-bottom: 18px; }
 .panel-header > div { min-width: 0; }

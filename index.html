@@ -175,6 +175,7 @@
       </section>
 
       <section class="view" id="inventory" aria-label="المخزون">
+        <div class="inventory-stack">
         <div class="panel">
           <div class="panel-header">
             <div>
@@ -191,6 +192,43 @@
               <tbody id="productsTable"></tbody>
             </table>
           </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>جداول المستودعات</h2>
+              <p>الفروع، السعة، المسؤول، ونسبة الإشغال لكل مستودع</p>
+            </div>
+            <button class="primary">＋ مستودع جديد</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>الكود</th><th>المستودع</th><th>الفرع</th><th>المسؤول</th><th>الإشغال</th><th>النسبة</th><th>الحالة</th></tr>
+              </thead>
+              <tbody id="warehousesTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>توزيع المخزون على المستودعات</h2>
+              <p>الكميات المتاحة والمحجوزة وحد إعادة الطلب حسب الصنف</p>
+            </div>
+            <button class="secondary">تحويل بين المستودعات</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>المستودع</th><th>الصنف</th><th>التصنيف</th><th>المتاح</th><th>المحجوز</th><th>الصافي</th><th>الحالة</th></tr>
+              </thead>
+              <tbody id="warehouseStockTable"></tbody>
+            </table>
+          </div>
+        </div>
         </div>
       </section>
 

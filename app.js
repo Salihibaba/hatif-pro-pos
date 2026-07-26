@@ -16,6 +16,21 @@ const customers = [
   { name: "مورد التقنيات الحديثة", type: "مورد", total: "12,800,000 أوقية" }
 ];
 
+const warehouses = [
+  { code: "WH-NKC", name: "المستودع الرئيسي - نواكشوط", branch: "فرع نواكشوط", manager: "محمد الأمين", capacity: 120, used: 80, status: "نشط" },
+  { code: "WH-NDB", name: "مستودع نواذيبو", branch: "فرع نواذيبو", manager: "خديجة بنت سالم", capacity: 75, used: 43, status: "نشط" },
+  { code: "WH-ACC", name: "مستودع القطع والإكسسوارات", branch: "فرع نواكشوط", manager: "شركة الساحل", capacity: 220, used: 146, status: "مراجعة" }
+];
+
+const warehouseStocks = [
+  { warehouse: "المستودع الرئيسي - نواكشوط", product: "iPhone 15 Pro Max 256GB", category: "هواتف جديدة", available: 4, reserved: 1, minimum: 2 },
+  { warehouse: "المستودع الرئيسي - نواكشوط", product: "Samsung Galaxy A55 5G", category: "هواتف جديدة", available: 7, reserved: 2, minimum: 3 },
+  { warehouse: "مستودع نواذيبو", product: "Xiaomi Redmi Note 13", category: "هواتف جديدة", available: 3, reserved: 0, minimum: 4 },
+  { warehouse: "مستودع نواذيبو", product: "iPhone 12 مستعمل 128GB", category: "هواتف مستعملة", available: 2, reserved: 0, minimum: 1 },
+  { warehouse: "مستودع القطع والإكسسوارات", product: "شاحن USB-C سريع 25W", category: "إكسسوارات", available: 8, reserved: 3, minimum: 10 },
+  { warehouse: "مستودع القطع والإكسسوارات", product: "حماية شاشة زجاجية", category: "إكسسوارات", available: 32, reserved: 6, minimum: 20 }
+];
+
 let invoices = [
   ["#H1048", "خديجة بنت سالم", "اليوم 11:42", "286,000 أوقية", "مدفوعة"],
   ["#H1047", "عميل نقدي", "اليوم 10:18", "78,000 أوقية", "مدفوعة"],
@@ -83,6 +98,52 @@ function renderProductsTable(items = getVisibleProducts()) {
         <td>${money(product.price)}</td>
         <td>${product.stock}</td>
         <td><span class="badge ${status[1]}">${status[0]}</span></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function getWarehouseUsage(warehouse) {
+  return Math.round((warehouse.used / warehouse.capacity) * 100);
+}
+
+function renderWarehousesTable() {
+  const table = document.getElementById("warehousesTable");
+  if (!table) return;
+
+  table.innerHTML = warehouses.map(warehouse => {
+    const usage = getWarehouseUsage(warehouse);
+    const badge = warehouse.status === "مراجعة" ? "warn" : "";
+    return `
+      <tr>
+        <td><strong>${warehouse.code}</strong></td>
+        <td>${warehouse.name}</td>
+        <td>${warehouse.branch}</td>
+        <td>${warehouse.manager}</td>
+        <td>${warehouse.used} / ${warehouse.capacity}</td>
+        <td>${usage}%</td>
+        <td><span class="badge ${badge}">${warehouse.status}</span></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderWarehouseStocksTable() {
+  const table = document.getElementById("warehouseStockTable");
+  if (!table) return;
+
+  table.innerHTML = warehouseStocks.map(item => {
+    const netAvailable = Math.max(0, item.available - item.reserved);
+    const needsReorder = netAvailable <= item.minimum;
+    return `
+      <tr>
+        <td><strong>${item.warehouse}</strong></td>
+        <td>${item.product}</td>
+        <td>${item.category}</td>
+        <td>${item.available}</td>
+        <td>${item.reserved}</td>
+        <td>${netAvailable}</td>
+        <td><span class="badge ${needsReorder ? "warn" : ""}">${needsReorder ? "إعادة طلب" : "متوازن"}</span></td>
       </tr>
     `;
   }).join("");
@@ -291,6 +352,8 @@ document.getElementById("themeToggle").addEventListener("click", event => {
 
 renderSaleProducts();
 renderProductsTable();
+renderWarehousesTable();
+renderWarehouseStocksTable();
 renderCustomers();
 renderInvoices();
 renderCart();
