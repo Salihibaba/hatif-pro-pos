@@ -79,9 +79,9 @@ function renderSaleProducts(items = getVisibleProducts()) {
       <div class="product-thumb" aria-hidden="true">${product.icon}</div>
       <div>
         <strong>${product.name}</strong>
-        <p class="eyebrow">${product.category} · ${product.stock} متاح · IMEI ${product.imei}</p>
+        <p class="eyebrow">${product.category} - ${product.stock} متاح - IMEI ${product.imei}</p>
       </div>
-      <button class="primary" data-add="${product.id}" ${product.stock === 0 ? "disabled" : ""}>إضافة · ${money(product.price)}</button>
+      <button class="primary" data-add="${product.id}" ${product.stock === 0 ? "disabled" : ""}>إضافة - ${money(product.price)}</button>
     </article>
   `).join("") : `<div class="empty-state">لا توجد نتائج مطابقة للبحث الحالي.</div>`;
 }
@@ -105,6 +105,22 @@ function renderProductsTable(items = getVisibleProducts()) {
 
 function getWarehouseUsage(warehouse) {
   return Math.round((warehouse.used / warehouse.capacity) * 100);
+}
+
+function renderInventorySummary() {
+  const activeWarehouses = warehouses.filter(warehouse => warehouse.status === "نشط").length;
+  const totalCapacity = warehouses.reduce((sum, warehouse) => sum + warehouse.capacity, 0);
+  const totalUsed = warehouses.reduce((sum, warehouse) => sum + warehouse.used, 0);
+  const totalReserved = warehouseStocks.reduce((sum, item) => sum + item.reserved, 0);
+  const reorderItems = warehouseStocks.filter(item => Math.max(0, item.available - item.reserved) <= item.minimum).length;
+  const usage = totalCapacity ? Math.round((totalUsed / totalCapacity) * 100) : 0;
+
+  document.getElementById("activeWarehouseCount").textContent = activeWarehouses;
+  document.getElementById("warehouseStatusSummary").textContent = `${warehouses.length} مستودعات مسجلة`;
+  document.getElementById("warehouseCapacity").textContent = `${totalUsed} / ${totalCapacity}`;
+  document.getElementById("warehouseUsageSummary").textContent = `${usage}% إشغال`;
+  document.getElementById("reservedStockCount").textContent = totalReserved;
+  document.getElementById("reorderCount").textContent = reorderItems;
 }
 
 function renderWarehousesTable() {
@@ -223,7 +239,7 @@ function renderCart() {
       <div class="cart-row">
         <div>
           <strong>${item.name}</strong>
-          <small>${money(item.price)} للقطعة · ربح ${money(item.price - item.cost)}</small>
+          <small>${money(item.price)} للقطعة - ربح ${money(item.price - item.cost)}</small>
         </div>
         <div class="qty">
           <button aria-label="إنقاص ${item.name}" data-qty="${item.id}" data-delta="-1">−</button>
@@ -352,6 +368,7 @@ document.getElementById("themeToggle").addEventListener("click", event => {
 
 renderSaleProducts();
 renderProductsTable();
+renderInventorySummary();
 renderWarehousesTable();
 renderWarehouseStocksTable();
 renderCustomers();

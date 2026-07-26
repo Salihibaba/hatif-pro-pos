@@ -176,6 +176,29 @@
 
       <section class="view" id="inventory" aria-label="المخزون">
         <div class="inventory-stack">
+        <div class="stats-grid inventory-summary">
+          <article class="metric">
+            <span>المستودعات النشطة</span>
+            <strong id="activeWarehouseCount">0</strong>
+            <small id="warehouseStatusSummary">كل الفروع</small>
+          </article>
+          <article class="metric">
+            <span>إجمالي السعة</span>
+            <strong id="warehouseCapacity">0</strong>
+            <small id="warehouseUsageSummary">0% إشغال</small>
+          </article>
+          <article class="metric">
+            <span>المخزون المحجوز</span>
+            <strong id="reservedStockCount">0</strong>
+            <small>قطعة قيد البيع أو التحويل</small>
+          </article>
+          <article class="metric warning">
+            <span>إعادة الطلب</span>
+            <strong id="reorderCount">0</strong>
+            <small>أصناف وصلت للحد الأدنى</small>
+          </article>
+        </div>
+
         <div class="panel">
           <div class="panel-header">
             <div>

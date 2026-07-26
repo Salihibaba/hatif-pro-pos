@@ -427,7 +427,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--surface) 92%, var(--bg)); 
     display: block;
   }
   .brand, .branch-box { display: none; }
-  .nav-list { grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .nav-list { grid-template-columns: repeat(8, 1fr); gap: 4px; }
   .nav-item { min-height: 48px; padding: 0; }
   .app-shell { padding: 18px 14px 82px; }
   .topbar { align-items: stretch; flex-direction: column; }
