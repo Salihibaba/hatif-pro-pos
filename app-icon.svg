@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Hatif Pro">
+  <rect width="512" height="512" rx="96" fill="#101827"/>
+  <rect x="142" y="72" width="228" height="368" rx="42" fill="#f8fafc"/>
+  <rect x="166" y="108" width="180" height="272" rx="22" fill="#1f8a70"/>
+  <circle cx="256" cy="408" r="16" fill="#101827"/>
+  <path d="M214 172h84v34h-46v42h46v34h-84z" fill="#f8fafc"/>
+  <path d="M312 172h30v110h-30z" fill="#f8fafc"/>
+</svg>
