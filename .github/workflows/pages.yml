@@ -28,6 +28,19 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      - name: Create Supabase browser config
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          cat > supabase-config.js <<EOF
+          window.SUPABASE_CONFIG = {
+            url: "${SUPABASE_URL}",
+            anonKey: "${SUPABASE_ANON_KEY}"
+          };
+          EOF
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
