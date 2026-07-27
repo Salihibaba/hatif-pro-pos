@@ -89,3 +89,14 @@ https://salihibaba.github.io/hatif-pro-pos/
 - سكربت `auto-sync.ps1` يجلب تغييرات GitHub البعيدة دوريًا، حتى لو لم توجد تغييرات محلية.
 
 لجعل البيانات تعمل من أي جهاز، شغّل آخر نسخة من `supabase-schema.sql` داخل Supabase SQL Editor، ثم ضع رابط Supabase والمفتاح العام في `supabase-config.js` قبل النشر أو في إعدادات الاستضافة.
+
+## صلاحيات Supabase في GitHub
+
+يقوم GitHub Pages بإنشاء ملف `supabase-config.js` أثناء النشر من GitHub Secrets.
+
+أضف هذه الأسرار في إعدادات المستودع:
+
+- `SUPABASE_URL`: رابط مشروع Supabase.
+- `SUPABASE_ANON_KEY`: المفتاح العام `anon public`.
+
+لا تضف مفتاح `service_role` إلى GitHub Pages أو أي تطبيق يعمل داخل المتصفح.
