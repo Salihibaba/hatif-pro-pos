@@ -73,10 +73,10 @@ const titles = {
 let activeCategory = "الكل";
 
 async function loadSupabaseData() {
-  if (localStorage.getItem(localKeys.resetMode) === "local-defaults") return;
+  if (localStorage.getItem(localKeys.resetMode) === "local-defaults") return false;
 
   const database = window.phoneProSupabase;
-  if (!database?.isConnected) return;
+  if (!database?.isConnected) return false;
 
   try {
     const remoteData = await database.loadInitialData();
@@ -85,9 +85,12 @@ async function loadSupabaseData() {
     if (remoteData.warehouses.length) warehouses = remoteData.warehouses;
     if (remoteData.warehouseStocks.length) warehouseStocks = remoteData.warehouseStocks;
     if (remoteData.invoices.length) invoices = remoteData.invoices;
+    if (remoteData.tradeEvents.length) tradeEvents = remoteData.tradeEvents;
+    return true;
   } catch (error) {
     console.error("Supabase sync failed", error);
     showToast("تعذر تحميل بيانات Supabase، سيتم استخدام البيانات المحلية.");
+    return false;
   }
 }
 
@@ -113,6 +116,23 @@ function loadLocalData() {
 
 function saveLocalData(key, value) {
   localStorage.setItem(localKeys[key], JSON.stringify(value));
+}
+
+async function saveCloud(action, successMessage, fallbackMessage) {
+  if (!window.phoneProSupabase?.isConnected || localStorage.getItem(localKeys.resetMode) === "local-defaults") {
+    if (fallbackMessage) showToast(fallbackMessage);
+    return false;
+  }
+
+  try {
+    await action(window.phoneProSupabase);
+    if (successMessage) showToast(successMessage);
+    return true;
+  } catch (error) {
+    console.error("Cloud sync failed", error);
+    if (fallbackMessage) showToast(fallbackMessage);
+    return false;
+  }
 }
 
 async function resetLocalAppData() {
@@ -477,10 +497,10 @@ function openEntryModal({ title, fields, onSubmit }) {
     </label>
   `).join("");
 
-  form.onsubmit = event => {
+  form.onsubmit = async event => {
     event.preventDefault();
     const values = Object.fromEntries(new FormData(form).entries());
-    onSubmit(values);
+    await onSubmit(values);
     modal.close();
   };
 

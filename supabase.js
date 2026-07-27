@@ -19,6 +19,14 @@
     return [row.number, row.customer, issuedAt, total, row.status || "مدفوعة"];
   }
 
+  function normalizeTradeEvent(row) {
+    return {
+      when: row.event_when || "الآن",
+      title: row.title,
+      note: row.note || ""
+    };
+  }
+
   async function readTable(table, orderColumn) {
     let query = client.from(table).select("*");
     if (orderColumn) query = query.order(orderColumn, { ascending: false });
@@ -32,12 +40,13 @@
     client,
 
     async loadInitialData() {
-      const [products, customers, warehouses, warehouseStocks, invoices] = await Promise.all([
+      const [products, customers, warehouses, warehouseStocks, invoices, tradeEvents] = await Promise.all([
         readTable("products", "id"),
         readTable("customers", "name"),
         readTable("warehouses", "code"),
         readTable("warehouse_stocks", "warehouse"),
-        readTable("invoices", "issued_at")
+        readTable("invoices", "issued_at"),
+        readTable("trade_events", "created_at")
       ]);
 
       return {
@@ -45,8 +54,43 @@
         customers,
         warehouses,
         warehouseStocks,
-        invoices: invoices.map(normalizeInvoice)
+        invoices: invoices.map(normalizeInvoice),
+        tradeEvents: tradeEvents.map(normalizeTradeEvent)
       };
+    },
+
+    async upsertProduct(product) {
+      const { error } = await client.from("products").upsert(product, { onConflict: "id" });
+      if (error) throw error;
+    },
+
+    async deleteProduct(productId) {
+      const { error } = await client.from("products").delete().eq("id", productId);
+      if (error) throw error;
+    },
+
+    async upsertCustomer(customer) {
+      const { error } = await client.from("customers").upsert(customer, { onConflict: "name" });
+      if (error) throw error;
+    },
+
+    async upsertWarehouse(warehouse) {
+      const { error } = await client.from("warehouses").upsert(warehouse, { onConflict: "code" });
+      if (error) throw error;
+    },
+
+    async upsertWarehouseStocks(stocks) {
+      const { error } = await client.from("warehouse_stocks").upsert(stocks, { onConflict: "warehouse,product" });
+      if (error) throw error;
+    },
+
+    async addTradeEvent(event) {
+      const { error } = await client.from("trade_events").insert({
+        event_when: event.when,
+        title: event.title,
+        note: event.note
+      });
+      if (error) throw error;
     },
 
     async recordSale({ invoice, items }) {
