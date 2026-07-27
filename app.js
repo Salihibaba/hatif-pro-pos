@@ -39,10 +39,24 @@ let invoices = [
   ["#H1044", "عميل نقدي", "الخميس 19:20", "12,000 أوقية", "مدفوعة"]
 ];
 
+let tradeEvents = [
+  { when: "اليوم", title: "iPhone 12 مستعمل مقابل Galaxy A55", note: "فرق مدفوع 86,000 أوقية" },
+  { when: "أمس", title: "شراء Redmi Note 13", note: "تكلفة 92,000 أوقية" },
+  { when: "هذا الأسبوع", title: "استبدال Samsung S22 Ultra", note: "ربح متوقع 48,000 أوقية" }
+];
+
 const cart = new Map();
 const formatter = new Intl.NumberFormat("ar-MR");
 const money = value => `${formatter.format(value)} أوقية`;
 const normalize = value => value.toString().trim().toLocaleLowerCase("ar");
+const localKeys = {
+  products: "phoneProProducts",
+  customers: "phoneProCustomers",
+  warehouses: "phoneProWarehouses",
+  warehouseStocks: "phoneProWarehouseStocks",
+  invoices: "phoneProInvoices",
+  tradeEvents: "phoneProTradeEvents"
+};
 
 const titles = {
   dashboard: "لوحة التحكم",
@@ -72,6 +86,30 @@ async function loadSupabaseData() {
     console.error("Supabase sync failed", error);
     showToast("تعذر تحميل بيانات Supabase، سيتم استخدام البيانات المحلية.");
   }
+}
+
+function loadLocalData() {
+  const pairs = [
+    ["products", value => { products = value; }],
+    ["customers", value => { customers = value; }],
+    ["warehouses", value => { warehouses = value; }],
+    ["warehouseStocks", value => { warehouseStocks = value; }],
+    ["invoices", value => { invoices = value; }],
+    ["tradeEvents", value => { tradeEvents = value; }]
+  ];
+
+  pairs.forEach(([key, setValue]) => {
+    try {
+      const raw = localStorage.getItem(localKeys[key]);
+      if (raw) setValue(JSON.parse(raw));
+    } catch {
+      localStorage.removeItem(localKeys[key]);
+    }
+  });
+}
+
+function saveLocalData(key, value) {
+  localStorage.setItem(localKeys[key], JSON.stringify(value));
 }
 
 function switchView(viewId) {
@@ -115,6 +153,7 @@ function renderProductsTable(items = getVisibleProducts()) {
         <td>${money(product.price)}</td>
         <td>${product.stock}</td>
         <td><span class="badge ${status[1]}">${status[0]}</span></td>
+        <td><button class="danger-button" data-delete-product="${product.id}" type="button">حذف</button></td>
       </tr>
     `;
   }).join("");
@@ -209,6 +248,23 @@ function renderInvoices() {
   }).join("");
 }
 
+function renderTradeEvents() {
+  const timeline = document.getElementById("tradeTimeline");
+  if (!timeline) return;
+
+  timeline.innerHTML = tradeEvents.map(event => `
+    <div><span>${event.when}</span><strong>${event.title}</strong><small>${event.note}</small></div>
+  `).join("");
+}
+
+function updateCustomerOptions() {
+  const select = document.getElementById("customerSelect");
+  const current = select.value;
+  const names = ["عميل نقدي", ...customers.map(customer => customer.name)];
+  select.innerHTML = [...new Set(names)].map(name => `<option>${name}</option>`).join("");
+  if (names.includes(current)) select.value = current;
+}
+
 function updateActionStates() {
   const hasItems = cart.size > 0;
   ["payButton", "draftButton", "clearCart", "printButton", "shareButton"].forEach(id => {
@@ -244,6 +300,22 @@ function changeQty(productId, delta) {
   item.qty += delta;
   if (item.qty <= 0) cart.delete(productId);
   renderCart();
+}
+
+function deleteProduct(productId) {
+  const product = products.find(item => item.id === productId);
+  if (!product) return;
+
+  products = products.filter(item => item.id !== productId);
+  warehouseStocks = warehouseStocks.filter(item => item.product !== product.name);
+  cart.delete(productId);
+  saveLocalData("products", products);
+  saveLocalData("warehouseStocks", warehouseStocks);
+  renderCart();
+  refreshProductViews();
+  renderInventorySummary();
+  renderWarehouseStocksTable();
+  showToast("تم حذف الصنف من المخزون المحلي.");
 }
 
 function renderCart() {
@@ -300,6 +372,8 @@ async function completePayment() {
 
   const invoice = [nextNumber, customer, "الآن", money(grandTotal), "مدفوعة"];
   invoices = [invoice, ...invoices];
+  saveLocalData("products", products);
+  saveLocalData("invoices", invoices);
   cart.clear();
   renderCart();
   refreshProductViews();
@@ -353,6 +427,208 @@ function restoreDraft() {
   }
 }
 
+function getNumberValue(value) {
+  return Number(String(value).replace(/[^\d.]/g, "")) || 0;
+}
+
+function openEntryModal({ title, fields, onSubmit }) {
+  const modal = document.getElementById("entryModal");
+  const form = document.getElementById("entryForm");
+  const fieldsContainer = document.getElementById("modalFields");
+  document.getElementById("modalTitle").textContent = title;
+  fieldsContainer.innerHTML = fields.map(field => `
+    <label class="field">
+      <span>${field.label}</span>
+      ${field.type === "select"
+        ? `<select name="${field.name}" ${field.required ? "required" : ""}>${field.options.map(option => `<option ${option === field.value ? "selected" : ""}>${option}</option>`).join("")}</select>`
+        : `<input name="${field.name}" type="${field.type || "text"}" value="${field.value || ""}" ${field.min !== undefined ? `min="${field.min}"` : ""} ${field.required ? "required" : ""} />`}
+    </label>
+  `).join("");
+
+  form.onsubmit = event => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(form).entries());
+    onSubmit(values);
+    modal.close();
+  };
+
+  modal.showModal();
+}
+
+function addProduct() {
+  openEntryModal({
+    title: "إضافة صنف جديد",
+    fields: [
+      { name: "name", label: "اسم الصنف", required: true },
+      { name: "category", label: "التصنيف", type: "select", options: ["هواتف جديدة", "هواتف مستعملة", "إكسسوارات"], value: "هواتف جديدة" },
+      { name: "imei", label: "IMEI", value: "-" },
+      { name: "cost", label: "التكلفة", type: "number", min: 0, required: true },
+      { name: "price", label: "سعر البيع", type: "number", min: 0, required: true },
+      { name: "stock", label: "الكمية", type: "number", min: 0, required: true }
+    ],
+    onSubmit(values) {
+      const duplicateImei = values.imei !== "-" && products.some(product => product.imei === values.imei);
+      if (duplicateImei) {
+        showToast("لا يمكن إضافة صنف بنفس رقم IMEI.");
+        return;
+      }
+
+      products.push({
+        id: Math.max(0, ...products.map(product => Number(product.id))) + 1,
+        name: values.name.trim(),
+        category: values.category,
+        price: getNumberValue(values.price),
+        cost: getNumberValue(values.cost),
+        stock: getNumberValue(values.stock),
+        imei: values.imei.trim() || "-",
+        icon: values.category === "إكسسوارات" ? "□" : values.category === "هواتف مستعملة" ? "▧" : "▰"
+      });
+      saveLocalData("products", products);
+      refreshProductViews();
+      renderInventorySummary();
+      showToast("تمت إضافة الصنف إلى المخزون.");
+    }
+  });
+}
+
+function addWarehouse() {
+  openEntryModal({
+    title: "إضافة مستودع",
+    fields: [
+      { name: "code", label: "الكود", required: true },
+      { name: "name", label: "اسم المستودع", required: true },
+      { name: "branch", label: "الفرع", value: "فرع نواكشوط", required: true },
+      { name: "manager", label: "المسؤول", required: true },
+      { name: "capacity", label: "السعة", type: "number", min: 1, required: true },
+      { name: "used", label: "المستخدم", type: "number", min: 0, value: "0" },
+      { name: "status", label: "الحالة", type: "select", options: ["نشط", "مراجعة"], value: "نشط" }
+    ],
+    onSubmit(values) {
+      if (warehouses.some(warehouse => warehouse.code === values.code.trim())) {
+        showToast("كود المستودع موجود مسبقًا.");
+        return;
+      }
+
+      warehouses.push({
+        code: values.code.trim(),
+        name: values.name.trim(),
+        branch: values.branch.trim(),
+        manager: values.manager.trim(),
+        capacity: getNumberValue(values.capacity),
+        used: getNumberValue(values.used),
+        status: values.status
+      });
+      saveLocalData("warehouses", warehouses);
+      renderInventorySummary();
+      renderWarehousesTable();
+      showToast("تمت إضافة المستودع.");
+    }
+  });
+}
+
+function addContact() {
+  openEntryModal({
+    title: "إضافة جهة",
+    fields: [
+      { name: "name", label: "الاسم", required: true },
+      { name: "type", label: "النوع", type: "select", options: ["عميل نقدي", "عميل ذهبي", "عميل شركات", "مورد"], value: "عميل نقدي" },
+      { name: "total", label: "إجمالي التعامل", value: "0 أوقية" }
+    ],
+    onSubmit(values) {
+      if (customers.some(customer => customer.name === values.name.trim())) {
+        showToast("هذه الجهة مسجلة مسبقًا.");
+        return;
+      }
+
+      customers.push({ name: values.name.trim(), type: values.type, total: values.total.trim() || "0 أوقية" });
+      saveLocalData("customers", customers);
+      renderCustomers();
+      updateCustomerOptions();
+      showToast("تمت إضافة الجهة.");
+    }
+  });
+}
+
+function transferStock() {
+  if (!warehouseStocks.length) {
+    showToast("لا توجد كميات موزعة على المستودعات.");
+    return;
+  }
+
+  openEntryModal({
+    title: "تحويل بين المستودعات",
+    fields: [
+      { name: "product", label: "الصنف", type: "select", options: [...new Set(warehouseStocks.map(item => item.product))] },
+      { name: "from", label: "من مستودع", type: "select", options: warehouses.map(warehouse => warehouse.name) },
+      { name: "to", label: "إلى مستودع", type: "select", options: warehouses.map(warehouse => warehouse.name) },
+      { name: "qty", label: "الكمية", type: "number", min: 1, required: true }
+    ],
+    onSubmit(values) {
+      const qty = getNumberValue(values.qty);
+      const source = warehouseStocks.find(item => item.product === values.product && item.warehouse === values.from);
+      if (!source || source.available - source.reserved < qty) {
+        showToast("الكمية غير متاحة في المستودع المصدر.");
+        return;
+      }
+
+      let target = warehouseStocks.find(item => item.product === values.product && item.warehouse === values.to);
+      if (!target) {
+        target = { warehouse: values.to, product: values.product, category: source.category, available: 0, reserved: 0, minimum: source.minimum };
+        warehouseStocks.push(target);
+      }
+      source.available -= qty;
+      target.available += qty;
+      saveLocalData("warehouseStocks", warehouseStocks);
+      renderInventorySummary();
+      renderWarehouseStocksTable();
+      showToast("تم تسجيل تحويل المخزون.");
+    }
+  });
+}
+
+function saveTradeEvent(event) {
+  event.preventDefault();
+  const type = document.getElementById("tradeType").value;
+  const party = document.getElementById("tradeParty").value.trim();
+  const imei = document.getElementById("tradeImei").value.trim();
+  const cost = getNumberValue(document.getElementById("tradeCost").value);
+
+  tradeEvents = [{ when: "الآن", title: `${type} - ${party}`, note: `IMEI ${imei} - تكلفة ${money(cost)}` }, ...tradeEvents];
+  saveLocalData("tradeEvents", tradeEvents);
+  renderTradeEvents();
+  showToast("تم حفظ العملية في سجل الشراء والاستبدال.");
+}
+
+function exportInvoices() {
+  const header = ["رقم الفاتورة", "العميل", "التاريخ", "المبلغ", "الحالة"];
+  const rows = [header, ...invoices];
+  const csv = "\ufeff" + rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "phone-pro-invoices.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+  showToast("تم تصدير الفواتير بصيغة CSV قابلة للفتح في Excel.");
+}
+
+function printReceipt() {
+  if (!cart.size) return;
+  window.print();
+}
+
+async function shareInvoice() {
+  if (!cart.size) return;
+  const total = document.getElementById("grandTotal").textContent;
+  const text = `فاتورة هاتف برو - الإجمالي ${total}`;
+  if (navigator.share) {
+    await navigator.share({ title: "فاتورة هاتف برو", text });
+  } else {
+    await navigator.clipboard.writeText(text);
+    showToast("تم نسخ ملخص الفاتورة للمشاركة.");
+  }
+}
+
 function showToast(message) {
   const toast = document.getElementById("toast");
   toast.textContent = message;
@@ -376,8 +652,10 @@ document.querySelectorAll("[data-category]").forEach(button => {
 document.addEventListener("click", event => {
   const addButton = event.target.closest("[data-add]");
   const qtyButton = event.target.closest("[data-qty]");
+  const deleteProductButton = event.target.closest("[data-delete-product]");
   if (addButton) addToCart(Number(addButton.dataset.add));
   if (qtyButton) changeQty(Number(qtyButton.dataset.qty), Number(qtyButton.dataset.delta));
+  if (deleteProductButton) deleteProduct(Number(deleteProductButton.dataset.deleteProduct));
 });
 
 document.getElementById("clearCart").addEventListener("click", () => {
@@ -389,9 +667,17 @@ document.getElementById("clearCart").addEventListener("click", () => {
 
 document.getElementById("payButton").addEventListener("click", completePayment);
 document.getElementById("draftButton").addEventListener("click", saveDraft);
-document.getElementById("printButton").addEventListener("click", () => showToast("تم تجهيز قالب الطباعة الحرارية 80 مم."));
-document.getElementById("shareButton").addEventListener("click", () => showToast("تم تجهيز رابط إرسال الفاتورة عبر WhatsApp."));
+document.getElementById("printButton").addEventListener("click", printReceipt);
+document.getElementById("shareButton").addEventListener("click", shareInvoice);
 document.getElementById("globalSearch").addEventListener("input", refreshProductViews);
+document.getElementById("addProductButton").addEventListener("click", addProduct);
+document.getElementById("addWarehouseButton").addEventListener("click", addWarehouse);
+document.getElementById("addContactButton").addEventListener("click", addContact);
+document.getElementById("transferStockButton").addEventListener("click", transferStock);
+document.getElementById("exportInvoicesButton").addEventListener("click", exportInvoices);
+document.getElementById("tradeForm").addEventListener("submit", saveTradeEvent);
+document.getElementById("modalCloseButton").addEventListener("click", () => document.getElementById("entryModal").close());
+document.getElementById("modalCancelButton").addEventListener("click", () => document.getElementById("entryModal").close());
 document.getElementById("themeToggle").addEventListener("click", event => {
   document.body.classList.toggle("dark");
   event.currentTarget.textContent = document.body.classList.contains("dark") ? "الوضع النهاري" : "الوضع الليلي";
@@ -399,6 +685,8 @@ document.getElementById("themeToggle").addEventListener("click", event => {
 
 async function initializeApp() {
   await loadSupabaseData();
+  loadLocalData();
+  updateCustomerOptions();
   renderSaleProducts();
   renderProductsTable();
   renderInventorySummary();
@@ -406,6 +694,7 @@ async function initializeApp() {
   renderWarehouseStocksTable();
   renderCustomers();
   renderInvoices();
+  renderTradeEvents();
   renderCart();
   restoreDraft();
 }

@@ -205,12 +205,12 @@
               <h2>إدارة الهواتف والإكسسوارات</h2>
               <p>IMEI، الحالة، تكلفة الشراء، وسعر البيع</p>
             </div>
-            <button class="primary">＋ صنف جديد</button>
+            <button class="primary" id="addProductButton" type="button">＋ صنف جديد</button>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
-                <tr><th>الصنف</th><th>التصنيف</th><th>IMEI</th><th>التكلفة</th><th>سعر البيع</th><th>المخزون</th><th>الحالة</th></tr>
+                <tr><th>الصنف</th><th>التصنيف</th><th>IMEI</th><th>التكلفة</th><th>سعر البيع</th><th>المخزون</th><th>الحالة</th><th>إجراء</th></tr>
               </thead>
               <tbody id="productsTable"></tbody>
             </table>
@@ -223,7 +223,7 @@
               <h2>جداول المستودعات</h2>
               <p>الفروع، السعة، المسؤول، ونسبة الإشغال لكل مستودع</p>
             </div>
-            <button class="primary">＋ مستودع جديد</button>
+            <button class="primary" id="addWarehouseButton" type="button">＋ مستودع جديد</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -241,7 +241,7 @@
               <h2>توزيع المخزون على المستودعات</h2>
               <p>الكميات المتاحة والمحجوزة وحد إعادة الطلب حسب الصنف</p>
             </div>
-            <button class="secondary">تحويل بين المستودعات</button>
+            <button class="secondary" id="transferStockButton" type="button">تحويل بين المستودعات</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -259,15 +259,17 @@
         <div class="trade-grid">
           <section class="panel">
             <div class="panel-header"><h2>تسجيل عملية شراء</h2></div>
-            <label class="field"><span>المورد أو العميل</span><input value="أحمد ولد المختار" /></label>
-            <label class="field"><span>نوع العملية</span><select><option>شراء هاتف مستعمل</option><option>استبدال بهاتف جديد</option><option>إرجاع</option></select></label>
-            <label class="field"><span>رقم IMEI</span><input value="356938035643809" /></label>
-            <label class="field"><span>سعر الشراء</span><input value="145000" /></label>
-            <button class="primary full">حفظ العملية</button>
+            <form id="tradeForm">
+              <label class="field"><span>المورد أو العميل</span><input id="tradeParty" value="أحمد ولد المختار" required /></label>
+              <label class="field"><span>نوع العملية</span><select id="tradeType"><option>شراء هاتف مستعمل</option><option>استبدال بهاتف جديد</option><option>إرجاع</option></select></label>
+              <label class="field"><span>رقم IMEI</span><input id="tradeImei" value="356938035643809" required /></label>
+              <label class="field"><span>سعر الشراء</span><input id="tradeCost" type="number" min="0" value="145000" required /></label>
+              <button class="primary full" type="submit">حفظ العملية</button>
+            </form>
           </section>
           <section class="panel">
             <div class="panel-header"><h2>آخر عمليات الاستبدال</h2></div>
-            <div class="timeline">
+            <div class="timeline" id="tradeTimeline">
               <div><span>اليوم</span><strong>iPhone 12 مستعمل مقابل Galaxy A55</strong><small>فرق مدفوع 86,000 أوقية</small></div>
               <div><span>أمس</span><strong>شراء Redmi Note 13</strong><small>تكلفة 92,000 أوقية</small></div>
               <div><span>هذا الأسبوع</span><strong>استبدال Samsung S22 Ultra</strong><small>ربح متوقع 48,000 أوقية</small></div>
@@ -281,7 +283,7 @@
           <section class="panel">
             <div class="panel-header">
               <h2>العملاء والموردون</h2>
-              <button class="primary">＋ جهة جديدة</button>
+              <button class="primary" id="addContactButton" type="button">＋ جهة جديدة</button>
             </div>
             <div class="customer-list" id="customersList"></div>
           </section>
@@ -313,7 +315,7 @@
               <h2>الفواتير الأخيرة</h2>
               <p>طباعة A4 أو حراري 58/80 مم وإرسال عبر WhatsApp</p>
             </div>
-            <button class="secondary">تصدير Excel</button>
+            <button class="secondary" id="exportInvoicesButton" type="button">تصدير Excel</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -375,6 +377,20 @@
         </div>
       </section>
     </main>
+
+    <dialog class="modal" id="entryModal" aria-labelledby="modalTitle">
+      <form method="dialog" class="modal-card" id="entryForm">
+        <div class="panel-header">
+          <h2 id="modalTitle">إضافة</h2>
+          <button class="icon-button" value="cancel" aria-label="إغلاق" type="button" id="modalCloseButton">×</button>
+        </div>
+        <div class="modal-fields" id="modalFields"></div>
+        <div class="modal-actions">
+          <button class="secondary" value="cancel" type="button" id="modalCancelButton">إلغاء</button>
+          <button class="primary" value="default" type="submit">حفظ</button>
+        </div>
+      </form>
+    </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

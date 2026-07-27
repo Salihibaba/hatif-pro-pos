@@ -143,7 +143,7 @@ h2 { margin-bottom: 4px; font-size: 20px; }
   color: var(--ink);
 }
 
-.icon-button, .user-chip, .primary, .secondary, .text-button, .theme-toggle, .segmented button {
+.icon-button, .user-chip, .primary, .secondary, .text-button, .theme-toggle, .segmented button, .danger-button {
   min-height: 42px;
   border-radius: 8px;
   border: 1px solid var(--line);
@@ -325,6 +325,14 @@ h2 { margin-bottom: 4px; font-size: 20px; }
 .primary:hover { background: var(--primary-dark); }
 .secondary:hover, .text-button:hover, .theme-toggle:hover { background: color-mix(in srgb, var(--surface) 84%, var(--primary) 10%); }
 .text-button { color: var(--accent); background: transparent; border-color: transparent; }
+.danger-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border-color: color-mix(in srgb, var(--danger) 30%, var(--line));
+  background: color-mix(in srgb, var(--surface) 86%, var(--danger) 8%);
+  color: var(--danger);
+}
+.danger-button:hover { background: color-mix(in srgb, var(--surface) 76%, var(--danger) 14%); }
 .full { width: 100%; justify-content: center; }
 
 .cart-panel { position: sticky; top: 24px; }
@@ -375,6 +383,40 @@ tbody tr:hover { background: color-mix(in srgb, var(--surface) 92%, var(--bg)); 
   border-bottom: 1px solid var(--line);
 }
 .toggle input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+.modal {
+  width: min(520px, calc(100vw - 28px));
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+}
+
+.modal::backdrop {
+  background: rgba(10, 18, 32, 0.42);
+}
+
+.modal-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 24px 60px rgba(10, 18, 32, 0.28);
+}
+
+.modal-fields {
+  display: grid;
+  gap: 10px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+}
 
 .toast {
   position: fixed;
@@ -440,6 +482,46 @@ tbody tr:hover { background: color-mix(in srgb, var(--surface) 92%, var(--bg)); 
   .pay-actions { grid-template-columns: 1fr; }
   .report-bars div { grid-template-columns: 72px 1fr 54px; }
   .toast { bottom: 76px; }
+}
+
+@media print {
+  body {
+    display: block;
+    background: #fff;
+    color: #000;
+  }
+
+  .sidebar, .topbar, .product-picker, .toast {
+    display: none !important;
+  }
+
+  .app-shell {
+    padding: 0;
+  }
+
+  .view, .view.active {
+    display: none;
+  }
+
+  #pos {
+    display: block;
+  }
+
+  .sales-layout {
+    display: block;
+  }
+
+  .cart-panel {
+    position: static;
+    width: 80mm;
+    box-shadow: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .pay-actions, #clearCart {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
