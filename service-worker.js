@@ -1,4 +1,4 @@
-const CACHE_NAME = "hatif-pro-v2";
+const CACHE_NAME = "hatif-pro-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
