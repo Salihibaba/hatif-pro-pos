@@ -34,6 +34,12 @@ while ($true) {
   }
 
   if ([string]::IsNullOrWhiteSpace(($status -join "`n"))) {
+    git pull --rebase $Remote $Branch | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+      Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') Remote changes checked."
+    } else {
+      Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') Remote check failed."
+    }
     Start-Sleep -Seconds $IntervalSeconds
     continue
   }

@@ -354,7 +354,7 @@ function changeQty(productId, delta) {
   renderCart();
 }
 
-function deleteProduct(productId) {
+async function deleteProduct(productId) {
   const product = products.find(item => item.id === productId);
   if (!product) return;
 
@@ -363,6 +363,11 @@ function deleteProduct(productId) {
   cart.delete(productId);
   saveLocalData("products", products);
   saveLocalData("warehouseStocks", warehouseStocks);
+  await saveCloud(
+    database => database.deleteProduct(productId),
+    "تم حذف الصنف ومزامنة الحذف مع السحابة.",
+    "تم حذف الصنف محليًا، وتعذرت مزامنته مع السحابة."
+  );
   renderCart();
   refreshProductViews();
   renderInventorySummary();
@@ -518,14 +523,14 @@ function addProduct() {
       { name: "price", label: "سعر البيع", type: "number", min: 0, required: true },
       { name: "stock", label: "الكمية", type: "number", min: 0, required: true }
     ],
-    onSubmit(values) {
+    async onSubmit(values) {
       const duplicateImei = values.imei !== "-" && products.some(product => product.imei === values.imei);
       if (duplicateImei) {
         showToast("لا يمكن إضافة صنف بنفس رقم IMEI.");
         return;
       }
 
-      products.push({
+      const product = {
         id: Math.max(0, ...products.map(product => Number(product.id))) + 1,
         name: values.name.trim(),
         category: values.category,
@@ -534,8 +539,15 @@ function addProduct() {
         stock: getNumberValue(values.stock),
         imei: values.imei.trim() || "-",
         icon: values.category === "إكسسوارات" ? "□" : values.category === "هواتف مستعملة" ? "▧" : "▰"
-      });
+      };
+
+      products.push(product);
       saveLocalData("products", products);
+      await saveCloud(
+        database => database.upsertProduct(product),
+        "تمت إضافة الصنف ومزامنته مع السحابة.",
+        "تمت إضافة الصنف محليًا، وتعذرت مزامنته مع السحابة."
+      );
       refreshProductViews();
       renderInventorySummary();
       showToast("تمت إضافة الصنف إلى المخزون.");
@@ -555,13 +567,13 @@ function addWarehouse() {
       { name: "used", label: "المستخدم", type: "number", min: 0, value: "0" },
       { name: "status", label: "الحالة", type: "select", options: ["نشط", "مراجعة"], value: "نشط" }
     ],
-    onSubmit(values) {
+    async onSubmit(values) {
       if (warehouses.some(warehouse => warehouse.code === values.code.trim())) {
         showToast("كود المستودع موجود مسبقًا.");
         return;
       }
 
-      warehouses.push({
+      const warehouse = {
         code: values.code.trim(),
         name: values.name.trim(),
         branch: values.branch.trim(),
@@ -569,8 +581,15 @@ function addWarehouse() {
         capacity: getNumberValue(values.capacity),
         used: getNumberValue(values.used),
         status: values.status
-      });
+      };
+
+      warehouses.push(warehouse);
       saveLocalData("warehouses", warehouses);
+      await saveCloud(
+        database => database.upsertWarehouse(warehouse),
+        "تمت إضافة المستودع ومزامنته مع السحابة.",
+        "تمت إضافة المستودع محليًا، وتعذرت مزامنته مع السحابة."
+      );
       renderInventorySummary();
       renderWarehousesTable();
       showToast("تمت إضافة المستودع.");
@@ -586,14 +605,20 @@ function addContact() {
       { name: "type", label: "النوع", type: "select", options: ["عميل نقدي", "عميل ذهبي", "عميل شركات", "مورد"], value: "عميل نقدي" },
       { name: "total", label: "إجمالي التعامل", value: "0 أوقية" }
     ],
-    onSubmit(values) {
+    async onSubmit(values) {
       if (customers.some(customer => customer.name === values.name.trim())) {
         showToast("هذه الجهة مسجلة مسبقًا.");
         return;
       }
 
-      customers.push({ name: values.name.trim(), type: values.type, total: values.total.trim() || "0 أوقية" });
+      const customer = { name: values.name.trim(), type: values.type, total: values.total.trim() || "0 أوقية" };
+      customers.push(customer);
       saveLocalData("customers", customers);
+      await saveCloud(
+        database => database.upsertCustomer(customer),
+        "تمت إضافة الجهة ومزامنتها مع السحابة.",
+        "تمت إضافة الجهة محليًا، وتعذرت مزامنتها مع السحابة."
+      );
       renderCustomers();
       updateCustomerOptions();
       showToast("تمت إضافة الجهة.");
@@ -615,7 +640,7 @@ function transferStock() {
       { name: "to", label: "إلى مستودع", type: "select", options: warehouses.map(warehouse => warehouse.name) },
       { name: "qty", label: "الكمية", type: "number", min: 1, required: true }
     ],
-    onSubmit(values) {
+    async onSubmit(values) {
       const qty = getNumberValue(values.qty);
       const source = warehouseStocks.find(item => item.product === values.product && item.warehouse === values.from);
       if (!source || source.available - source.reserved < qty) {
@@ -631,6 +656,11 @@ function transferStock() {
       source.available -= qty;
       target.available += qty;
       saveLocalData("warehouseStocks", warehouseStocks);
+      await saveCloud(
+        database => database.upsertWarehouseStocks([source, target]),
+        "تم تحويل المخزون ومزامنته مع السحابة.",
+        "تم تحويل المخزون محليًا، وتعذرت مزامنته مع السحابة."
+      );
       renderInventorySummary();
       renderWarehouseStocksTable();
       showToast("تم تسجيل تحويل المخزون.");
@@ -638,15 +668,21 @@ function transferStock() {
   });
 }
 
-function saveTradeEvent(event) {
+async function saveTradeEvent(event) {
   event.preventDefault();
   const type = document.getElementById("tradeType").value;
   const party = document.getElementById("tradeParty").value.trim();
   const imei = document.getElementById("tradeImei").value.trim();
   const cost = getNumberValue(document.getElementById("tradeCost").value);
 
-  tradeEvents = [{ when: "الآن", title: `${type} - ${party}`, note: `IMEI ${imei} - تكلفة ${money(cost)}` }, ...tradeEvents];
+  const tradeEvent = { when: "الآن", title: `${type} - ${party}`, note: `IMEI ${imei} - تكلفة ${money(cost)}` };
+  tradeEvents = [tradeEvent, ...tradeEvents];
   saveLocalData("tradeEvents", tradeEvents);
+  await saveCloud(
+    database => database.addTradeEvent(tradeEvent),
+    "تم حفظ العملية ومزامنتها مع السحابة.",
+    "تم حفظ العملية محليًا، وتعذرت مزامنتها مع السحابة."
+  );
   renderTradeEvents();
   showToast("تم حفظ العملية في سجل الشراء والاستبدال.");
 }
@@ -738,8 +774,8 @@ document.getElementById("themeToggle").addEventListener("click", event => {
 });
 
 async function initializeApp() {
-  await loadSupabaseData();
-  loadLocalData();
+  const loadedCloudData = await loadSupabaseData();
+  if (!loadedCloudData) loadLocalData();
   updateCustomerOptions();
   renderSaleProducts();
   renderProductsTable();
