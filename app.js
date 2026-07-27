@@ -139,6 +139,11 @@ async function resetLocalAppData() {
   window.location.replace(`${window.location.pathname}?reset=${Date.now()}`);
 }
 
+function enableCloudData() {
+  localStorage.removeItem(localKeys.resetMode);
+  window.location.reload();
+}
+
 function switchView(viewId) {
   document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === viewId));
   document.querySelectorAll(".nav-item").forEach(item => item.classList.toggle("active", item.dataset.view === viewId));
@@ -706,6 +711,7 @@ document.getElementById("tradeForm").addEventListener("submit", saveTradeEvent);
 document.getElementById("modalCloseButton").addEventListener("click", () => document.getElementById("entryModal").close());
 document.getElementById("modalCancelButton").addEventListener("click", () => document.getElementById("entryModal").close());
 document.getElementById("resetAppButton").addEventListener("click", resetLocalAppData);
+document.getElementById("enableCloudButton").addEventListener("click", enableCloudData);
 document.getElementById("themeToggle").addEventListener("click", event => {
   document.body.classList.toggle("dark");
   event.currentTarget.textContent = document.body.classList.contains("dark") ? "الوضع النهاري" : "الوضع الليلي";
