@@ -39,3 +39,19 @@ powershell -ExecutionPolicy Bypass -File .\start-auto-sync.ps1
 ```
 
 إذا ظهر تعارض أثناء `git pull --rebase`، سيترك السكربت التزامن إلى أن يتم حل التعارض يدويًا.
+
+## تشغيل تطبيق الويب
+
+لتشغيل التطبيق كسيرفر محلي:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run-web-app.ps1
+```
+
+ثم افتح:
+
+```text
+http://127.0.0.1:4173
+```
+
+يدعم التطبيق الآن ملف `manifest.webmanifest` و`service-worker.js`، لذلك يمكن تثبيته من المتصفح كتطبيق ويب عند تشغيله عبر `http://127.0.0.1:4173` أو عبر استضافة HTTPS.
