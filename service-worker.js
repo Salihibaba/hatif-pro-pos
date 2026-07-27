@@ -1,4 +1,4 @@
-const CACHE_NAME = "hatif-pro-v1";
+const CACHE_NAME = "hatif-pro-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -27,16 +27,20 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
+  const request = event.request;
 
   event.respondWith(
-    fetch(event.request)
+    fetch(request)
       .then(response => {
         const copy = response.clone();
-        if (event.request.url.startsWith(self.location.origin)) {
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        if (request.url.startsWith(self.location.origin)) {
+          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
         }
         return response;
       })
-      .catch(() => caches.match(event.request).then(response => response || caches.match("./index.html")))
+      .catch(() => {
+        if (request.mode === "navigate") return caches.match("./index.html");
+        return caches.match(request).then(response => response || caches.match("./index.html"));
+      })
   );
 });

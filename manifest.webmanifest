@@ -1,20 +1,45 @@
 {
+  "id": "hatif-pro-pos",
   "name": "هاتف برو",
   "short_name": "هاتف برو",
   "description": "تطبيق ويب عربي لإدارة محلات بيع وشراء الهواتف.",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"],
+  "orientation": "any",
   "dir": "rtl",
   "lang": "ar",
   "background_color": "#f6f7fb",
   "theme_color": "#101827",
+  "categories": ["business", "productivity", "finance"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "app-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "بيع سريع",
+      "short_name": "بيع",
+      "url": "./#pos",
+      "description": "فتح شاشة البيع السريع"
+    },
+    {
+      "name": "المخزون",
+      "short_name": "مخزون",
+      "url": "./#inventory",
+      "description": "فتح شاشة المخزون"
+    },
+    {
+      "name": "الفواتير",
+      "short_name": "فواتير",
+      "url": "./#invoices",
+      "description": "فتح شاشة الفواتير"
     }
   ]
 }

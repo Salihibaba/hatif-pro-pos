@@ -55,3 +55,11 @@ http://127.0.0.1:4173
 ```
 
 يدعم التطبيق الآن ملف `manifest.webmanifest` و`service-worker.js`، لذلك يمكن تثبيته من المتصفح كتطبيق ويب عند تشغيله عبر `http://127.0.0.1:4173` أو عبر استضافة HTTPS.
+
+## التثبيت على Android و iPhone و iPad
+
+- Android: افتح رابط التطبيق في Chrome ثم اختر Install app أو Add to Home screen.
+- iPhone و iPad: افتح رابط التطبيق في Safari، اضغط Share، ثم Add to Home Screen.
+- للحصول على تجربة تثبيت كاملة خارج الجهاز المحلي، انشر التطبيق على استضافة HTTPS مثل GitHub Pages أو Netlify أو Vercel.
+
+ملاحظة: هذه نسخة PWA تعمل كتطبيق مثبت من المتصفح. نشرها كتطبيق أصلي داخل Google Play أو App Store يحتاج خطوة تغليف إضافية مثل Capacitor.
