@@ -55,7 +55,8 @@ const localKeys = {
   warehouses: "phoneProWarehouses",
   warehouseStocks: "phoneProWarehouseStocks",
   invoices: "phoneProInvoices",
-  tradeEvents: "phoneProTradeEvents"
+  tradeEvents: "phoneProTradeEvents",
+  resetMode: "phoneProResetMode"
 };
 
 const titles = {
@@ -72,6 +73,8 @@ const titles = {
 let activeCategory = "الكل";
 
 async function loadSupabaseData() {
+  if (localStorage.getItem(localKeys.resetMode) === "local-defaults") return;
+
   const database = window.phoneProSupabase;
   if (!database?.isConnected) return;
 
@@ -112,17 +115,28 @@ function saveLocalData(key, value) {
   localStorage.setItem(localKeys[key], JSON.stringify(value));
 }
 
-function resetLocalAppData() {
+async function resetLocalAppData() {
   const confirmed = window.confirm("سيتم تصفير البيانات المحلية والمسودات وإعدادات هذا المتصفح. هل تريد المتابعة؟");
   if (!confirmed) return;
 
-  Object.values(localKeys).forEach(key => localStorage.removeItem(key));
-  localStorage.removeItem("phoneProDraft");
-  localStorage.removeItem("phoneProSettings");
-  localStorage.removeItem("phoneProTheme");
-  localStorage.removeItem("phoneProUser");
+  Object.keys(localStorage)
+    .filter(key => key.startsWith("phonePro"))
+    .forEach(key => localStorage.removeItem(key));
+
+  localStorage.setItem(localKeys.resetMode, "local-defaults");
   sessionStorage.clear();
-  window.location.reload();
+
+  if ("caches" in window) {
+    const cacheNames = await caches.keys();
+    await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+  }
+
+  if ("serviceWorker" in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map(registration => registration.unregister()));
+  }
+
+  window.location.replace(`${window.location.pathname}?reset=${Date.now()}`);
 }
 
 function switchView(viewId) {
