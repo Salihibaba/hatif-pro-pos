@@ -112,6 +112,19 @@ function saveLocalData(key, value) {
   localStorage.setItem(localKeys[key], JSON.stringify(value));
 }
 
+function resetLocalAppData() {
+  const confirmed = window.confirm("سيتم تصفير البيانات المحلية والمسودات وإعدادات هذا المتصفح. هل تريد المتابعة؟");
+  if (!confirmed) return;
+
+  Object.values(localKeys).forEach(key => localStorage.removeItem(key));
+  localStorage.removeItem("phoneProDraft");
+  localStorage.removeItem("phoneProSettings");
+  localStorage.removeItem("phoneProTheme");
+  localStorage.removeItem("phoneProUser");
+  sessionStorage.clear();
+  window.location.reload();
+}
+
 function switchView(viewId) {
   document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === viewId));
   document.querySelectorAll(".nav-item").forEach(item => item.classList.toggle("active", item.dataset.view === viewId));
@@ -678,6 +691,7 @@ document.getElementById("exportInvoicesButton").addEventListener("click", export
 document.getElementById("tradeForm").addEventListener("submit", saveTradeEvent);
 document.getElementById("modalCloseButton").addEventListener("click", () => document.getElementById("entryModal").close());
 document.getElementById("modalCancelButton").addEventListener("click", () => document.getElementById("entryModal").close());
+document.getElementById("resetAppButton").addEventListener("click", resetLocalAppData);
 document.getElementById("themeToggle").addEventListener("click", event => {
   document.body.classList.toggle("dark");
   event.currentTarget.textContent = document.body.classList.contains("dark") ? "الوضع النهاري" : "الوضع الليلي";

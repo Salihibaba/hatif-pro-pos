@@ -343,6 +343,12 @@ h2 { margin-bottom: 4px; font-size: 20px; }
 }
 .danger-button:hover { background: color-mix(in srgb, var(--surface) 76%, var(--danger) 14%); }
 .full { width: 100%; justify-content: center; }
+.danger-panel {
+  border-color: color-mix(in srgb, var(--danger) 32%, var(--line));
+}
+.reset-button {
+  min-height: 46px;
+}
 
 .cart-panel { position: sticky; top: 24px; }
 .field { display: grid; align-content: center; gap: 4px; margin-bottom: 12px; height: auto; padding-block: 8px; }
