@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../auth/presentation/auth_controller.dart';
 import '../../module_placeholder/presentation/module_screen.dart';
 
-class AppShellScreen extends StatelessWidget {
+class AppShellScreen extends ConsumerWidget {
   const AppShellScreen({required this.child, super.key});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final width = MediaQuery.sizeOf(context).width;
     final isTablet = width >= 900;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('هاتف برو'),
+        actions: [
+          IconButton(
+            tooltip: 'تسجيل الخروج',
+            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
       body: Row(
         children: [
           if (isTablet) const _SideNavigation(),

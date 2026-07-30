@@ -148,3 +148,10 @@ flutter build ios --release --dart-define-from-file=firebase_defines.json
 - أساس قاعدة Drift المحلية.
 - Unit Tests وWidget Tests.
 - GitHub Actions لفحص وبناء Flutter.
+
+مرحلة المصادقة:
+
+- Firebase Authentication عبر Repository مستقل.
+- شاشة دخول وتسجيل عربية.
+- حماية التوجيه عبر go_router حسب حالة المستخدم.
+- زر تسجيل خروج داخل الواجهة الرئيسية.
