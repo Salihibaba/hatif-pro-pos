@@ -100,3 +100,51 @@ https://salihibaba.github.io/hatif-pro-pos/
 - `SUPABASE_ANON_KEY`: المفتاح العام `anon public`.
 
 لا تضف مفتاح `service_role` إلى GitHub Pages أو أي تطبيق يعمل داخل المتصفح.
+
+## تطبيق Flutter للجوال والتابلت
+
+يحتوي المستودع الآن على تطبيق Flutter مهيكل للعمل على Android وAndroid Tablet وiPhone وiPad.
+
+البنية:
+
+- `lib/core`: التوجيه، الثيم، قاعدة البيانات، والنماذج المشتركة.
+- `lib/features`: وحدات Clean Architecture حسب كل مجال عمل.
+- Riverpod لإدارة الحالة.
+- go_router للتنقل.
+- Firebase Auth وFirestore وStorage للخدمات السحابية.
+- Drift/SQLite للعمل دون اتصال.
+
+التشغيل المحلي:
+
+```powershell
+flutter create --platforms=android,ios --project-name hatif_pro .
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+flutter test
+flutter run
+```
+
+إعداد Firebase:
+
+```powershell
+copy firebase_defines.example.json firebase_defines.json
+```
+
+ثم ضع قيم Firebase وشغّل البناء:
+
+```powershell
+flutter build apk --release --dart-define-from-file=firebase_defines.json
+flutter build ios --release --dart-define-from-file=firebase_defines.json
+```
+
+مرحلة التسليم الحالية:
+
+- هيكل Flutter إنتاجي.
+- واجهة عربية RTL بتصميم Material 3.
+- تصميم متجاوب للجوال والتابلت.
+- لوحة تحكم وتنقل لكل وحدات النظام التجاري.
+- نماذج Domain وعقود Repository.
+- أساس خدمة مزامنة Firestore.
+- أساس قاعدة Drift المحلية.
+- Unit Tests وWidget Tests.
+- GitHub Actions لفحص وبناء Flutter.

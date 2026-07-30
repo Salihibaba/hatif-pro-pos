@@ -13,3 +13,12 @@ temp/
 .env
 .env.*
 supabase-config.js
+firebase_defines.json
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+coverage/
