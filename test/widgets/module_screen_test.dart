@@ -4,11 +4,13 @@ import 'package:hatif_pro/features/module_placeholder/presentation/module_screen
 
 void main() {
   testWidgets('module screen renders Arabic module title', (tester) async {
+    final module = ModuleScreen.modules.first;
+
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Directionality(
           textDirection: TextDirection.rtl,
-          child: ModuleScreen(module: ModuleScreen.modules[0]),
+          child: ModuleScreen(module: module),
         ),
       ),
     );
