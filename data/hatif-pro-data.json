@@ -1,18 +1,8 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-02T16:58:44.547Z",
+  "updatedAt": "2026-08-02T17:00:02.016Z",
   "payload": {
     "products": [
-      {
-        "id": 1,
-        "name": "iPhone 15 Pro Max 256GB",
-        "category": "هواتف جديدة",
-        "price": 630000,
-        "cost": 570000,
-        "stock": 6,
-        "imei": "353921102938475",
-        "icon": "▰"
-      },
       {
         "id": 2,
         "name": "Samsung Galaxy A55 5G",
@@ -121,14 +111,6 @@
       }
     ],
     "warehouseStocks": [
-      {
-        "warehouse": "المستودع الرئيسي - نواكشوط",
-        "product": "iPhone 15 Pro Max 256GB",
-        "category": "هواتف جديدة",
-        "available": 4,
-        "reserved": 1,
-        "minimum": 2
-      },
       {
         "warehouse": "المستودع الرئيسي - نواكشوط",
         "product": "Samsung Galaxy A55 5G",
