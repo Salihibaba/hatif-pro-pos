@@ -17,6 +17,21 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <section class="auth-screen" id="authScreen" aria-label="تسجيل الدخول">
+      <form class="auth-card" id="loginForm">
+        <div class="brand auth-brand">
+          <div class="brand-mark" aria-hidden="true">هـ</div>
+          <div>
+            <strong>هاتف برو</strong>
+            <span>تسجيل الدخول</span>
+          </div>
+        </div>
+        <label class="field"><span>اسم المستخدم</span><input id="loginUsername" autocomplete="username" required /></label>
+        <label class="field"><span>كلمة المرور</span><input id="loginPassword" type="password" autocomplete="current-password" required /></label>
+        <button class="primary full" type="submit">دخول</button>
+        <p class="auth-error" id="loginError" role="alert"></p>
+      </form>
+    </section>
     <aside class="sidebar" aria-label="القائمة الرئيسية">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">هـ</div>
@@ -58,9 +73,9 @@
           <button class="icon-button" title="قارئ الباركود" aria-label="قارئ الباركود">▣</button>
           <button class="icon-button" title="الإشعارات" aria-label="الإشعارات">🔔</button>
           <button class="theme-toggle" id="themeToggle" type="button">الوضع الليلي</button>
-          <button class="user-chip" aria-label="حساب المستخدم">
+          <button class="user-chip" id="logoutButton" aria-label="تسجيل الخروج">
             <span class="avatar">م</span>
-            <span>مدير النظام</span>
+            <span>hamma</span>
           </button>
         </div>
       </header>
@@ -411,6 +426,7 @@
               </div>
             </div>
             <button class="danger-button full reset-button" id="resetAppButton" type="button">تصفير الإعدادات والبيانات المحلية</button>
+            <button class="danger-button full reset-button" id="resetDataButton" type="button">إعادة ضبط البيانات</button>
             <button class="secondary full reset-button" id="enableCloudButton" type="button">إعادة تفعيل بيانات السحابة</button>
           </section>
         </div>
@@ -433,6 +449,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth-config.js"></script>
     <script src="supabase-config.js"></script>
     <script src="supabase.js"></script>
     <script src="github-sync.js"></script>
