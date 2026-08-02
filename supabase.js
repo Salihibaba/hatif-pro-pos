@@ -74,6 +74,11 @@
       if (error) throw error;
     },
 
+    async deleteCustomer(customerName) {
+      const { error } = await client.from("customers").delete().eq("name", customerName);
+      if (error) throw error;
+    },
+
     async upsertWarehouse(warehouse) {
       const { error } = await client.from("warehouses").upsert(warehouse, { onConflict: "code" });
       if (error) throw error;

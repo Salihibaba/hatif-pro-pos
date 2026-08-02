@@ -421,7 +421,10 @@ function renderCustomers() {
         <strong>${customer.name}</strong>
         <span>${customer.type}</span>
       </div>
-      <strong>${customer.total}</strong>
+      <div class="customer-actions">
+        <strong>${customer.total}</strong>
+        <button class="danger-button" data-delete-customer="${encodeURIComponent(customer.name)}" type="button">حذف</button>
+      </div>
     </article>
   `).join("");
 }
@@ -463,6 +466,25 @@ function updateActionStates() {
   ["payButton", "draftButton", "clearCart", "printButton", "shareButton"].forEach(id => {
     document.getElementById(id).disabled = !hasItems;
   });
+}
+
+async function deleteCustomer(customerName) {
+  const customer = customers.find(item => item.name === customerName);
+  if (!customer) return;
+
+  const confirmed = window.confirm(`هل تريد حذف ${customer.name} من قائمة العملاء والموردين؟`);
+  if (!confirmed) return;
+
+  customers = customers.filter(item => item.name !== customer.name);
+  saveLocalData("customers", customers);
+  await saveCloud(
+    database => database.deleteCustomer(customer.name),
+    "تم حذف الجهة ومزامنة الحذف مع السحابة.",
+    "تم حذف الجهة محلياً، وتعذرت مزامنة الحذف مع السحابة."
+  );
+  renderCustomers();
+  updateCustomerOptions();
+  showToast("تم حذف الجهة من قائمة العملاء والموردين.");
 }
 
 function addToCart(productId) {
@@ -882,9 +904,11 @@ document.addEventListener("click", event => {
   const addButton = event.target.closest("[data-add]");
   const qtyButton = event.target.closest("[data-qty]");
   const deleteProductButton = event.target.closest("[data-delete-product]");
+  const deleteCustomerButton = event.target.closest("[data-delete-customer]");
   if (addButton) addToCart(Number(addButton.dataset.add));
   if (qtyButton) changeQty(Number(qtyButton.dataset.qty), Number(qtyButton.dataset.delta));
   if (deleteProductButton) deleteProduct(Number(deleteProductButton.dataset.deleteProduct));
+  if (deleteCustomerButton) deleteCustomer(decodeURIComponent(deleteCustomerButton.dataset.deleteCustomer));
 });
 
 document.getElementById("clearCart").addEventListener("click", () => {

@@ -392,6 +392,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--surface) 92%, var(--bg)); 
 .customer-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .customer-card strong, .customer-card span { display: block; }
 .customer-card span { color: var(--muted); font-size: 13px; margin-top: 3px; }
+.customer-actions { display: flex; align-items: center; gap: 10px; }
 .customer-profile { display: grid; gap: 16px; align-content: start; }
 .avatar.large { width: 58px; height: 58px; font-size: 24px; }
 .compact { grid-template-columns: repeat(2, 1fr); margin-bottom: 0; }
