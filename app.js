@@ -168,6 +168,10 @@ function updateGithubStatus(message) {
   if (status) status.textContent = message;
 }
 
+function getGithubErrorMessage(error) {
+  return window.phoneProGithubSync?.getReadableError?.(error) || "تعذر تنفيذ العملية على GitHub.";
+}
+
 function scheduleGithubAutoSave() {
   if (!appReadyForGithubSync || applyingGithubData || !window.phoneProGithubSync?.isConfigured()) return;
   window.phoneProGithubSync.scheduleSave(getAppDataSnapshot, updateGithubStatus);
@@ -237,7 +241,7 @@ async function pullGithubData({ silent = false } = {}) {
     return false;
   } catch (error) {
     console.error("GitHub pull failed", error);
-    updateGithubStatus("تعذر تحميل بيانات GitHub. تحقق من Token والمستودع.");
+    updateGithubStatus(getGithubErrorMessage(error));
     return false;
   }
 }
@@ -256,7 +260,7 @@ async function pushGithubData() {
     return true;
   } catch (error) {
     console.error("GitHub push failed", error);
-    updateGithubStatus("تعذر الحفظ على GitHub. تحقق من صلاحية Contents Read/Write.");
+    updateGithubStatus(getGithubErrorMessage(error));
     return false;
   }
 }
@@ -265,7 +269,8 @@ async function saveGithubSettingsAndConnect() {
   if (!window.phoneProGithubSync) return;
   window.phoneProGithubSync.saveSettings(collectGithubSettings());
   updateGithubStatus("تم حفظ إعدادات GitHub. جاري اختبار الربط...");
-  await pullGithubData({ silent: true });
+  const loaded = await pullGithubData({ silent: true });
+  if (!loaded) await pushGithubData();
 }
 
 async function saveCloud(action, successMessage, fallbackMessage) {

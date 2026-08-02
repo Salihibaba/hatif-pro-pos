@@ -11,6 +11,16 @@
   let saveTimer = null;
   let saveQueue = Promise.resolve();
 
+  function normalizeSettings(settings) {
+    return {
+      owner: (settings.owner || "").trim(),
+      repo: (settings.repo || "").trim(),
+      branch: (settings.branch || "").trim() || DEFAULT_SETTINGS.branch,
+      path: (settings.path || "").trim() || DEFAULT_SETTINGS.path,
+      token: (settings.token || "").trim()
+    };
+  }
+
   function loadSettings() {
     try {
       return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}") };
@@ -20,13 +30,7 @@
   }
 
   function saveSettings(settings) {
-    const cleanSettings = {
-      owner: settings.owner.trim(),
-      repo: settings.repo.trim(),
-      branch: settings.branch.trim() || DEFAULT_SETTINGS.branch,
-      path: settings.path.trim() || DEFAULT_SETTINGS.path,
-      token: settings.token.trim()
-    };
+    const cleanSettings = normalizeSettings(settings);
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(cleanSettings));
     return cleanSettings;
   }
@@ -42,10 +46,30 @@
 
   function requestHeaders(settings) {
     return {
-      "Accept": "application/vnd.github+json",
-      "Authorization": `Bearer ${settings.token}`,
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${settings.token}`,
       "X-GitHub-Api-Version": "2022-11-28"
     };
+  }
+
+  async function buildGithubError(response, action) {
+    let details = "";
+    try {
+      const body = await response.json();
+      details = body.message ? ` - ${body.message}` : "";
+    } catch {
+      details = "";
+    }
+    return new Error(`${action}: ${response.status}${details}`);
+  }
+
+  function getReadableError(error) {
+    const message = error?.message || "Unknown error";
+    if (message.includes("401")) return "فشل GitHub: رمز Token غير صحيح أو منتهي.";
+    if (message.includes("403")) return "فشل GitHub: Token لا يملك صلاحية Contents Read/Write.";
+    if (message.includes("404")) return "فشل GitHub: المستودع أو المسار غير موجود أو لا توجد صلاحية للوصول.";
+    if (message.includes("409")) return "فشل GitHub: حدث تعارض في الملف، اضغط تحميل ثم حفظ الآن.";
+    return `فشل GitHub: ${message}`;
   }
 
   function decodeContent(content) {
@@ -70,7 +94,7 @@
     });
 
     if (response.status === 404) return { sha: null, data: null };
-    if (!response.ok) throw new Error(`GitHub load failed: ${response.status}`);
+    if (!response.ok) throw await buildGithubError(response, "GitHub load failed");
 
     const file = await response.json();
     return {
@@ -110,7 +134,7 @@
       body: JSON.stringify(body)
     });
 
-    if (!response.ok) throw new Error(`GitHub save failed: ${response.status}`);
+    if (!response.ok) throw await buildGithubError(response, "GitHub save failed");
     return response.json();
   }
 
@@ -120,11 +144,12 @@
       if (!isConfigured()) return;
       onStatus?.("جاري الحفظ التلقائي على GitHub...");
       saveQueue = saveQueue
+        .catch(() => undefined)
         .then(() => saveRemoteData(payloadProvider()))
         .then(() => onStatus?.(`تمت المزامنة مع GitHub في ${new Date().toLocaleTimeString("ar")}`))
         .catch(error => {
           console.error("GitHub sync failed", error);
-          onStatus?.("تعذرت مزامنة GitHub. تحقق من Token والصلاحيات.");
+          onStatus?.(getReadableError(error));
         });
     }, 900);
   }
@@ -135,6 +160,7 @@
     isConfigured,
     loadRemoteData,
     saveRemoteData,
-    scheduleSave
+    scheduleSave,
+    getReadableError
   };
 })();
