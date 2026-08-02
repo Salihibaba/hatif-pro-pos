@@ -83,53 +83,6 @@ let activeCategory = "الكل";
 
 let appReadyForGithubSync = false;
 let applyingGithubData = false;
-const appCredentials = {
-  username: window.PHONE_PRO_AUTH?.username || "hamma",
-  passwordHash: window.PHONE_PRO_AUTH?.passwordHash || ""
-};
-const authSessionKey = "phoneProAuthSession";
-
-async function hashPassword(value) {
-  const bytes = new TextEncoder().encode(value);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(hashBuffer), byte => byte.toString(16).padStart(2, "0")).join("");
-}
-
-function updateAuthScreen() {
-  const authScreen = document.getElementById("authScreen");
-  if (!authScreen) return;
-  const isLoggedIn = sessionStorage.getItem(authSessionKey) === appCredentials.username;
-  authScreen.classList.toggle("hidden", isLoggedIn);
-  document.body.classList.toggle("auth-locked", !isLoggedIn);
-}
-
-async function handleLogin(event) {
-  event.preventDefault();
-  const username = document.getElementById("loginUsername").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  const error = document.getElementById("loginError");
-  const passwordHash = await hashPassword(password);
-
-  if (!appCredentials.passwordHash) {
-    if (error) error.textContent = "لم يتم إعداد كلمة المرور بعد.";
-    return;
-  }
-
-  if (username === appCredentials.username && passwordHash === appCredentials.passwordHash) {
-    sessionStorage.setItem(authSessionKey, appCredentials.username);
-    if (error) error.textContent = "";
-    updateAuthScreen();
-    showToast("تم تسجيل الدخول بنجاح.");
-    return;
-  }
-
-  if (error) error.textContent = "اسم المستخدم أو كلمة المرور غير صحيحة.";
-}
-
-function logoutUser() {
-  sessionStorage.removeItem(authSessionKey);
-  updateAuthScreen();
-}
 
 async function loadSupabaseData() {
   if (localStorage.getItem(localKeys.resetMode) === "local-defaults") return false;
@@ -1000,8 +953,6 @@ document.getElementById("exportInvoicesButton").addEventListener("click", export
 document.getElementById("tradeForm").addEventListener("submit", saveTradeEvent);
 document.getElementById("modalCloseButton").addEventListener("click", () => document.getElementById("entryModal").close());
 document.getElementById("modalCancelButton").addEventListener("click", () => document.getElementById("entryModal").close());
-document.getElementById("loginForm")?.addEventListener("submit", handleLogin);
-document.getElementById("logoutButton")?.addEventListener("click", logoutUser);
 document.getElementById("resetAppButton").addEventListener("click", resetLocalAppData);
 document.getElementById("resetDataButton")?.addEventListener("click", resetBusinessData);
 document.getElementById("enableCloudButton").addEventListener("click", enableCloudData);
@@ -1014,7 +965,6 @@ document.getElementById("themeToggle").addEventListener("click", event => {
 });
 
 async function initializeApp() {
-  updateAuthScreen();
   fillGithubSettingsForm();
   const loadedCloudData = await loadSupabaseData();
   if (!loadedCloudData) loadLocalData();

@@ -13,7 +13,6 @@ temp/
 .env
 .env.*
 supabase-config.js
-auth-config.js
 firebase_defines.json
 
 # Flutter/Dart

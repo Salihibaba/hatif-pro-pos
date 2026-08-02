@@ -41,19 +41,6 @@ jobs:
           };
           EOF
 
-      - name: Create auth browser config
-        shell: bash
-        env:
-          APP_USERNAME: ${{ secrets.APP_USERNAME }}
-          APP_PASSWORD_HASH: ${{ secrets.APP_PASSWORD_HASH }}
-        run: |
-          cat > auth-config.js <<EOF
-          window.PHONE_PRO_AUTH = {
-            username: "${APP_USERNAME:-hamma}",
-            passwordHash: "${APP_PASSWORD_HASH}"
-          };
-          EOF
-
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
