@@ -384,6 +384,25 @@
             <label class="toggle"><input type="checkbox" checked /> <span>طلب صلاحية المدير لتعديل IMEI</span></label>
             <label class="toggle"><input type="checkbox" /> <span>تفعيل النسخ الاحتياطي عبر Firebase</span></label>
           </section>
+          <section class="panel github-sync-panel">
+            <div class="panel-header">
+              <div>
+                <h2>مزامنة GitHub</h2>
+                <p>احفظ بيانات التطبيق في ملف JSON داخل المستودع، ويتم تحديثه تلقائياً بعد كل تغيير.</p>
+              </div>
+            </div>
+            <label class="field"><span>مالك المستودع</span><input id="githubOwner" autocomplete="off" placeholder="Salihibaba" /></label>
+            <label class="field"><span>اسم المستودع</span><input id="githubRepo" autocomplete="off" placeholder="hatif-pro-pos" /></label>
+            <label class="field"><span>الفرع</span><input id="githubBranch" autocomplete="off" placeholder="main" /></label>
+            <label class="field"><span>مسار ملف البيانات</span><input id="githubDataPath" autocomplete="off" placeholder="data/hatif-pro-data.json" /></label>
+            <label class="field"><span>GitHub Token</span><input id="githubToken" type="password" autocomplete="off" placeholder="Fine-grained token: Contents Read/Write" /></label>
+            <div class="sync-actions">
+              <button class="primary" id="githubConnectButton" type="button">حفظ الربط</button>
+              <button class="secondary" id="githubPullButton" type="button">تحميل من GitHub</button>
+              <button class="secondary" id="githubPushButton" type="button">حفظ الآن</button>
+            </div>
+            <p class="sync-status" id="githubSyncStatus">غير متصل</p>
+          </section>
           <section class="panel danger-panel">
             <div class="panel-header">
               <div>
@@ -416,6 +435,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="supabase.js"></script>
+    <script src="github-sync.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

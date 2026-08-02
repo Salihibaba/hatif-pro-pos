@@ -72,6 +72,9 @@ const titles = {
 
 let activeCategory = "الكل";
 
+let appReadyForGithubSync = false;
+let applyingGithubData = false;
+
 async function loadSupabaseData() {
   if (localStorage.getItem(localKeys.resetMode) === "local-defaults") return false;
 
@@ -116,6 +119,144 @@ function loadLocalData() {
 
 function saveLocalData(key, value) {
   localStorage.setItem(localKeys[key], JSON.stringify(value));
+  scheduleGithubAutoSave();
+}
+
+function getAppDataSnapshot() {
+  return {
+    products,
+    customers,
+    warehouses,
+    warehouseStocks,
+    invoices,
+    tradeEvents
+  };
+}
+
+function applyAppDataSnapshot(data) {
+  if (!data || typeof data !== "object") return false;
+
+  applyingGithubData = true;
+  try {
+    if (Array.isArray(data.products)) products = data.products;
+    if (Array.isArray(data.customers)) customers = data.customers;
+    if (Array.isArray(data.warehouses)) warehouses = data.warehouses;
+    if (Array.isArray(data.warehouseStocks)) warehouseStocks = data.warehouseStocks;
+    if (Array.isArray(data.invoices)) invoices = data.invoices;
+    if (Array.isArray(data.tradeEvents)) tradeEvents = data.tradeEvents;
+
+    Object.entries(getAppDataSnapshot()).forEach(([key, value]) => {
+      localStorage.setItem(localKeys[key], JSON.stringify(value));
+    });
+    return true;
+  } finally {
+    applyingGithubData = false;
+  }
+}
+
+function updateGithubStatus(message) {
+  const status = document.getElementById("githubSyncStatus");
+  if (status) status.textContent = message;
+}
+
+function scheduleGithubAutoSave() {
+  if (!appReadyForGithubSync || applyingGithubData || !window.phoneProGithubSync?.isConfigured()) return;
+  window.phoneProGithubSync.scheduleSave(getAppDataSnapshot, updateGithubStatus);
+}
+
+function renderAllDataViews() {
+  updateCustomerOptions();
+  renderSaleProducts();
+  renderProductsTable();
+  renderInventorySummary();
+  renderWarehousesTable();
+  renderWarehouseStocksTable();
+  renderCustomers();
+  renderInvoices();
+  renderTradeEvents();
+  renderCart();
+}
+
+function fillGithubSettingsForm() {
+  if (!window.phoneProGithubSync) return;
+  const settings = window.phoneProGithubSync.loadSettings();
+  const fields = {
+    githubOwner: settings.owner,
+    githubRepo: settings.repo,
+    githubBranch: settings.branch,
+    githubDataPath: settings.path,
+    githubToken: settings.token
+  };
+
+  Object.entries(fields).forEach(([id, value]) => {
+    const field = document.getElementById(id);
+    if (field) field.value = value || "";
+  });
+
+  updateGithubStatus(window.phoneProGithubSync.isConfigured(settings)
+    ? "GitHub جاهز للمزامنة التلقائية."
+    : "أدخل Token بصلاحية Contents Read/Write ثم احفظ الربط.");
+}
+
+function collectGithubSettings() {
+  return {
+    owner: document.getElementById("githubOwner").value,
+    repo: document.getElementById("githubRepo").value,
+    branch: document.getElementById("githubBranch").value,
+    path: document.getElementById("githubDataPath").value,
+    token: document.getElementById("githubToken").value
+  };
+}
+
+async function pullGithubData({ silent = false } = {}) {
+  if (!window.phoneProGithubSync?.isConfigured()) {
+    updateGithubStatus("أكمل بيانات GitHub وToken أولاً.");
+    return false;
+  }
+
+  try {
+    updateGithubStatus("جاري تحميل البيانات من GitHub...");
+    const data = await window.phoneProGithubSync.loadRemoteData();
+    if (data && applyAppDataSnapshot(data)) {
+      renderAllDataViews();
+      updateGithubStatus("تم تحميل بيانات GitHub وتطبيقها على هذا المتصفح.");
+      if (!silent) showToast("تم تحميل البيانات من GitHub.");
+      return true;
+    }
+
+    updateGithubStatus("لا يوجد ملف بيانات بعد، سيتم إنشاؤه عند أول حفظ.");
+    return false;
+  } catch (error) {
+    console.error("GitHub pull failed", error);
+    updateGithubStatus("تعذر تحميل بيانات GitHub. تحقق من Token والمستودع.");
+    return false;
+  }
+}
+
+async function pushGithubData() {
+  if (!window.phoneProGithubSync?.isConfigured()) {
+    updateGithubStatus("أكمل بيانات GitHub وToken أولاً.");
+    return false;
+  }
+
+  try {
+    updateGithubStatus("جاري حفظ البيانات على GitHub...");
+    await window.phoneProGithubSync.saveRemoteData(getAppDataSnapshot());
+    updateGithubStatus(`تم الحفظ على GitHub في ${new Date().toLocaleTimeString("ar")}`);
+    showToast("تم حفظ البيانات على GitHub.");
+    return true;
+  } catch (error) {
+    console.error("GitHub push failed", error);
+    updateGithubStatus("تعذر الحفظ على GitHub. تحقق من صلاحية Contents Read/Write.");
+    return false;
+  }
+}
+
+async function saveGithubSettingsAndConnect() {
+  if (!window.phoneProGithubSync) return;
+  window.phoneProGithubSync.saveSettings(collectGithubSettings());
+  updateGithubStatus("تم حفظ إعدادات GitHub. جاري اختبار الربط...");
+  await pullGithubData({ silent: true });
 }
 
 async function saveCloud(action, successMessage, fallbackMessage) {
@@ -768,25 +909,22 @@ document.getElementById("modalCloseButton").addEventListener("click", () => docu
 document.getElementById("modalCancelButton").addEventListener("click", () => document.getElementById("entryModal").close());
 document.getElementById("resetAppButton").addEventListener("click", resetLocalAppData);
 document.getElementById("enableCloudButton").addEventListener("click", enableCloudData);
+document.getElementById("githubConnectButton")?.addEventListener("click", saveGithubSettingsAndConnect);
+document.getElementById("githubPullButton")?.addEventListener("click", () => pullGithubData());
+document.getElementById("githubPushButton")?.addEventListener("click", pushGithubData);
 document.getElementById("themeToggle").addEventListener("click", event => {
   document.body.classList.toggle("dark");
   event.currentTarget.textContent = document.body.classList.contains("dark") ? "الوضع النهاري" : "الوضع الليلي";
 });
 
 async function initializeApp() {
+  fillGithubSettingsForm();
   const loadedCloudData = await loadSupabaseData();
   if (!loadedCloudData) loadLocalData();
-  updateCustomerOptions();
-  renderSaleProducts();
-  renderProductsTable();
-  renderInventorySummary();
-  renderWarehousesTable();
-  renderWarehouseStocksTable();
-  renderCustomers();
-  renderInvoices();
-  renderTradeEvents();
-  renderCart();
+  await pullGithubData({ silent: true });
+  renderAllDataViews();
   restoreDraft();
+  appReadyForGithubSync = true;
 }
 
 if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {

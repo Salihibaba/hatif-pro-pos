@@ -1,9 +1,10 @@
-const CACHE_NAME = "hatif-pro-v3";
+const CACHE_NAME = "hatif-pro-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./github-sync.js",
   "./supabase.js",
   "./manifest.webmanifest",
   "./app-icon.svg"
