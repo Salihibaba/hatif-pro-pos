@@ -1,77 +1,17 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-02T17:00:02.016Z",
+  "updatedAt": "2026-08-02T17:02:26.052Z",
   "payload": {
     "products": [
       {
-        "id": 2,
-        "name": "Samsung Galaxy A55 5G",
+        "id": 1,
+        "name": "iphone17 Pro Max",
         "category": "هواتف جديدة",
-        "price": 238000,
-        "cost": 205000,
-        "stock": 12,
-        "imei": "358240116543902",
-        "icon": "▱"
-      },
-      {
-        "id": 3,
-        "name": "Xiaomi Redmi Note 13",
-        "category": "هواتف جديدة",
-        "price": 146000,
-        "cost": 119000,
-        "stock": 4,
-        "imei": "869120449218330",
+        "price": 580000,
+        "cost": 550000,
+        "stock": 25,
+        "imei": "-",
         "icon": "▰"
-      },
-      {
-        "id": 4,
-        "name": "iPhone 12 مستعمل 128GB",
-        "category": "هواتف مستعملة",
-        "price": 198000,
-        "cost": 145000,
-        "stock": 2,
-        "imei": "356938035643809",
-        "icon": "▧"
-      },
-      {
-        "id": 5,
-        "name": "Samsung S22 Ultra مستعمل",
-        "category": "هواتف مستعملة",
-        "price": 275000,
-        "cost": 221000,
-        "stock": 1,
-        "imei": "351234987650128",
-        "icon": "▧"
-      },
-      {
-        "id": 6,
-        "name": "شاحن USB-C سريع 25W",
-        "category": "إكسسوارات",
-        "price": 12000,
-        "cost": 6200,
-        "stock": 8,
-        "imei": "-",
-        "icon": "⚡"
-      },
-      {
-        "id": 7,
-        "name": "سماعة AirPods Pro",
-        "category": "إكسسوارات",
-        "price": 78000,
-        "cost": 52000,
-        "stock": 15,
-        "imei": "-",
-        "icon": "◉"
-      },
-      {
-        "id": 8,
-        "name": "حماية شاشة زجاجية",
-        "category": "إكسسوارات",
-        "price": 2500,
-        "cost": 900,
-        "stock": 32,
-        "imei": "-",
-        "icon": "□"
       }
     ],
     "customers": [
@@ -110,48 +50,7 @@
         "status": "مراجعة"
       }
     ],
-    "warehouseStocks": [
-      {
-        "warehouse": "المستودع الرئيسي - نواكشوط",
-        "product": "Samsung Galaxy A55 5G",
-        "category": "هواتف جديدة",
-        "available": 7,
-        "reserved": 2,
-        "minimum": 3
-      },
-      {
-        "warehouse": "مستودع نواذيبو",
-        "product": "Xiaomi Redmi Note 13",
-        "category": "هواتف جديدة",
-        "available": 3,
-        "reserved": 0,
-        "minimum": 4
-      },
-      {
-        "warehouse": "مستودع نواذيبو",
-        "product": "iPhone 12 مستعمل 128GB",
-        "category": "هواتف مستعملة",
-        "available": 2,
-        "reserved": 0,
-        "minimum": 1
-      },
-      {
-        "warehouse": "مستودع القطع والإكسسوارات",
-        "product": "شاحن USB-C سريع 25W",
-        "category": "إكسسوارات",
-        "available": 8,
-        "reserved": 3,
-        "minimum": 10
-      },
-      {
-        "warehouse": "مستودع القطع والإكسسوارات",
-        "product": "حماية شاشة زجاجية",
-        "category": "إكسسوارات",
-        "available": 32,
-        "reserved": 6,
-        "minimum": 20
-      }
-    ],
+    "warehouseStocks": [],
     "invoices": [
       [
         "#H1048",
